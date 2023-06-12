@@ -1,0 +1,28 @@
+{
+    "name": "@cabinetjs/server",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "scripts": {
+        "dev": "node -r ts-node/register ./src/index.ts",
+        "watch": "node -r ts-node/register --watch ./src/index.ts",
+        "prepare": "ts-patch install"
+    },
+    "devDependencies": {
+        "@types/node": "^20.3.0",
+        "@typescript-eslint/eslint-plugin": "^5.59.11",
+        "@typescript-eslint/parser": "^5.59.11",
+        "cross-env": "^7.0.3",
+        "eslint": "^8.42.0",
+        "eslint-config-prettier": "^8.8.0",
+        "eslint-plugin-prettier": "^4.2.1",
+        "prettier": "^2.8.8",
+        "swc-node": "^1.0.0",
+        "ts-node": "^10.9.1",
+        "ts-patch": "^2.1.0",
+        "typescript": "4.9.5"
+    },
+    "dependencies": {
+        "typia": "^4.0.8"
+    }
+}
