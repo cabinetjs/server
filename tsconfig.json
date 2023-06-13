@@ -7,6 +7,7 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
         "target": "es2017",
         "sourceMap": true,
         "outDir": "./dist",
@@ -18,9 +19,13 @@
         "strictBindCallApply": false,
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
+        "paths": {
+            "@root/*": ["src/*"],
+            "@utils/*": ["src/utils/*"]
+        },
         "plugins": [
             {
-                "transform": "typia/lib/transform",
+                "transform": "typia/lib/transform"
                 // "functional": true, // validate function type
                 // "numeric": true, // check `isNaN()` and `isFinite()`
             }

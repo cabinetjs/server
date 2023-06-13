@@ -1,0 +1,19 @@
+{
+    "$id": "#/components/schemas/ConfigData",
+    "type": "object",
+    "properties": {
+        "crawlInterval": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                }
+            ]
+        }
+    },
+    "required": [
+        "crawlInterval"
+    ]
+}
