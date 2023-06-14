@@ -1,7 +1,52 @@
 {
-    "$id": "#/components/schemas/ConfigData",
     "type": "object",
     "properties": {
+        "dataSources": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    },
+                    "boards": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "filters": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "content": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "image-board"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "url",
+                    "boards",
+                    "type",
+                    "name"
+                ]
+            }
+        },
         "crawlInterval": {
             "oneOf": [
                 {
@@ -14,6 +59,7 @@
         }
     },
     "required": [
+        "dataSources",
         "crawlInterval"
     ]
 }

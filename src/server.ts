@@ -2,6 +2,7 @@ import ms from "ms";
 import { AsyncTask, CronJob, SimpleIntervalJob, ToadScheduler } from "toad-scheduler";
 
 import { ConfigData, ConfigManager } from "@root/config";
+import { DataSourceTypes } from "@data-source";
 
 import { Logger } from "@utils/logger";
 import { formatInterval, isCronExpression } from "@utils/date";
@@ -12,18 +13,23 @@ interface ServerOptions {
 
 export class Server {
     public static async initialize(options: ServerOptions): Promise<Server> {
-        const { config } = await ConfigManager.initialize(options.configFilePath);
+        const { config, dataSources } = await ConfigManager.initialize(options.configFilePath);
+        for (const dataSource of dataSources) {
+            await dataSource.initialize();
+        }
 
-        return new Server(config);
+        return new Server(config, dataSources);
     }
 
     private readonly logger = new Logger(Server.name);
     private readonly config: ConfigData;
     private readonly scheduler: ToadScheduler;
+    private readonly dataSources: DataSourceTypes[];
 
-    private constructor(config: ConfigData) {
+    private constructor(config: ConfigData, dataSources: DataSourceTypes[]) {
         this.config = config;
         this.scheduler = new ToadScheduler();
+        this.dataSources = dataSources;
     }
 
     public async run(): Promise<void> {
@@ -51,6 +57,11 @@ export class Server {
 
     private async doCrawl(): Promise<void> {
         this.logger.log("Crawling task started.");
+
+        for (const dataSource of this.dataSources) {
+            await dataSource.crawl();
+        }
+
         this.logger.log("Crawling task finished.");
     }
     private async handleCrawlError(e: Error) {

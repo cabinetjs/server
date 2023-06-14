@@ -21,7 +21,11 @@
         "noFallthroughCasesInSwitch": false,
         "paths": {
             "@root/*": ["src/*"],
-            "@utils/*": ["src/utils/*"]
+            "@utils/*": ["src/utils/*"],
+            "@data-source": ["src/data-source"],
+            "@data-source/*": ["src/data-source/*"],
+            "@database": ["src/database"],
+            "@database/*": ["src/database/*"],
         },
         "plugins": [
             {

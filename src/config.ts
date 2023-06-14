@@ -3,15 +3,19 @@ import Ajv from "ajv";
 import betterAjvErrors from "better-ajv-errors";
 import { application, IJsonApplication } from "typia";
 
+import { createDataSource, DataSourceOptions, DataSourceTypes } from "@data-source";
+
 import { InvalidConfigError } from "@utils/errors/invalid-config";
 import { composeJsonSchema } from "@utils/json";
 import { Logger } from "@utils/logger";
 
 export interface ConfigData {
+    dataSources: DataSourceOptions[];
     crawlInterval: number | string;
 }
 
 const DEFAULT_CONFIG: ConfigData = {
+    dataSources: [],
     crawlInterval: "0 */1 * * *",
 };
 
@@ -24,6 +28,17 @@ export class ConfigManager {
         const schema = await composeJsonSchema<ConfigData>(ConfigManager.configSchema);
         if (!filePath) {
             throw new Error("Config file path is not defined");
+        }
+
+        if (process.env.NODE_ENV === "development") {
+            await this.logger.doWork({
+                level: "debug",
+                message: "JSON schema definition {cyan}",
+                args: [`'./cabinet.schema.json'`],
+                work: async () => {
+                    await fs.writeJSON(`cabinet.schema.json`, schema, { spaces: 4 });
+                },
+            });
         }
 
         const configData = await this.logger.doWork({
@@ -59,17 +74,6 @@ export class ConfigManager {
             },
         });
 
-        if (process.env.NODE_ENV === "development") {
-            await this.logger.doWork({
-                level: "debug",
-                message: "JSON schema definition {cyan}",
-                args: [`'./cabinet.schema.json'`],
-                work: async () => {
-                    await fs.writeJSON(`cabinet.schema.json`, schema, { spaces: 4 });
-                },
-            });
-        }
-
         return new ConfigManager(configData);
     }
 
@@ -77,6 +81,11 @@ export class ConfigManager {
 
     public get config(): ConfigData {
         return { ...this._config };
+    }
+    public get dataSources(): DataSourceTypes[] {
+        return this._config.dataSources.map(dataSourceOption => {
+            return createDataSource(dataSourceOption);
+        });
     }
 
     private constructor(config: ConfigData) {

@@ -9,5 +9,5 @@ export async function composeJsonSchema<T>(item: IJsonApplication): Promise<JSON
     const data = await $RefParser.dereference(item);
     const schema: JSONSchemaType<T> = data["schemas"][0];
 
-    return pickByDeep(schema, key => !key.startsWith("x-typia"));
+    return pickByDeep(schema, key => !key.startsWith("x-typia") && key !== "$id");
 }
