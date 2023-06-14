@@ -6,14 +6,4 @@ export type Fn<TArgs, TReturn> = TArgs extends never
 
 export type StringKeyOf<T> = Exclude<keyof T, symbol | number>;
 
-export interface Article {
-    id: number;
-    title?: string;
-    content: string;
-    comments: Comment[];
-}
-
-export interface Comment {
-    id: number;
-    content: string;
-}
+export type Nullable<T> = T | null | undefined;

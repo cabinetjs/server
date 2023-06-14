@@ -2,7 +2,9 @@ import ms from "ms";
 import { AsyncTask, CronJob, SimpleIntervalJob, ToadScheduler } from "toad-scheduler";
 
 import { ConfigData, ConfigManager } from "@root/config";
-import { DataSourceTypes } from "@data-source";
+
+import { Database } from "@database";
+import { BaseDataSource } from "@data-source/base";
 
 import { Logger } from "@utils/logger";
 import { formatInterval, isCronExpression } from "@utils/date";
@@ -13,23 +15,26 @@ interface ServerOptions {
 
 export class Server {
     public static async initialize(options: ServerOptions): Promise<Server> {
+        const database = await Database.initialize();
         const { config, dataSources } = await ConfigManager.initialize(options.configFilePath);
         for (const dataSource of dataSources) {
-            await dataSource.initialize();
+            await dataSource.initialize(database);
         }
 
-        return new Server(config, dataSources);
+        return new Server(config, dataSources, database);
     }
 
     private readonly logger = new Logger(Server.name);
     private readonly config: ConfigData;
     private readonly scheduler: ToadScheduler;
-    private readonly dataSources: DataSourceTypes[];
+    private readonly dataSources: BaseDataSource[];
+    private readonly database: Database;
 
-    private constructor(config: ConfigData, dataSources: DataSourceTypes[]) {
+    private constructor(config: ConfigData, dataSources: BaseDataSource[], database: Database) {
         this.config = config;
         this.scheduler = new ToadScheduler();
         this.dataSources = dataSources;
+        this.database = database;
     }
 
     public async run(): Promise<void> {
@@ -59,7 +64,9 @@ export class Server {
         this.logger.log("Crawling task started.");
 
         for (const dataSource of this.dataSources) {
-            await dataSource.crawl();
+            const boards = await dataSource.crawl();
+
+            await this.database.saveBoards(dataSource, boards);
         }
 
         this.logger.log("Crawling task finished.");

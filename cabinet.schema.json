@@ -32,7 +32,7 @@
                     "type": {
                         "type": "string",
                         "enum": [
-                            "image-board"
+                            "ImageBoard"
                         ]
                     },
                     "name": {

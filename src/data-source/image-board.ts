@@ -1,8 +1,10 @@
 import { BaseDataSource, BaseDataSourceOption } from "@data-source/base";
 import { BoardAPIResponse, CatalogAPIResponse, ThreadsAPIResponse } from "@data-source/image-board.types";
 
+import { MinimalBoard } from "@database/models/board.model";
+
 import { Fetcher } from "@utils/fetcher";
-import { Article } from "@utils/types";
+import _ from "lodash";
 
 export interface ImageBoardFilter {
     title?: string;
@@ -25,6 +27,7 @@ type RawThread = CatalogAPIResponse.Thread & { boardCode: string };
 
 export class ImageBoardDataSource extends BaseDataSource<"ImageBoard", ImageBoardDataSourceOptions> {
     private readonly fetcher = new Fetcher<FetcherResponseMap>(this.options.url);
+    private readonly targetBoards: BoardAPIResponse.Board[] = [];
 
     public constructor(options: ImageBoardDataSourceOptions) {
         super("ImageBoard", options);
@@ -38,11 +41,11 @@ export class ImageBoardDataSource extends BaseDataSource<"ImageBoard", ImageBoar
             if (!board) {
                 throw new Error(`Failed to find board with code '${boardCode}'`);
             }
-        }
 
-        return;
+            this.targetBoards.push(board);
+        }
     }
-    protected async doCrawl(): Promise<Article[]> {
+    protected async doCrawl(): Promise<MinimalBoard[]> {
         const { boards, filters } = this.options;
         const allOpeningThreads: RawThread[] = [];
         for (const boardCode of boards) {
@@ -82,27 +85,48 @@ export class ImageBoardDataSource extends BaseDataSource<"ImageBoard", ImageBoar
             }
         }
 
-        const commentMap: Record<number, ThreadsAPIResponse.Post[]> = {};
-        for (const { no, boardCode } of matchedThreads) {
-            const result = await this.fetcher.fetchJson("/{board}/thread/{thread}.json", {
-                method: "GET",
-                params: {
-                    thread: no,
-                    board: boardCode,
-                },
-            });
+        const boardArticles = _.chain(matchedThreads)
+            .groupBy(thread => thread.boardCode)
+            .value();
 
-            commentMap[no] = result.posts.filter(post => post.resto !== 0);
+        const results: MinimalBoard[] = [];
+        for (const [boardCode, articles] of Object.entries(boardArticles)) {
+            const targetBoard = this.targetBoards.find(board => board.board === boardCode);
+            if (!targetBoard) {
+                throw new Error(`Failed to find board with code '${boardCode}'`);
+            }
+
+            const board: MinimalBoard = {
+                uid: boardCode,
+                name: targetBoard.title,
+                description: targetBoard.meta_description,
+                articles: [],
+            };
+
+            for (const article of articles) {
+                const result = await this.fetcher
+                    .fetchJson("/{board}/thread/{thread}.json", {
+                        method: "GET",
+                        params: { board: boardCode, thread: article.no },
+                    })
+                    .then(({ posts }) => {
+                        return posts.filter(post => post.resto !== 0);
+                    });
+
+                board.articles.push({
+                    no: article.no,
+                    title: article.sub,
+                    content: article.com,
+                    comments: result.map(comment => ({
+                        no: comment.no,
+                        content: comment.com,
+                    })),
+                });
+            }
+
+            results.push(board);
         }
 
-        return matchedThreads.map(thread => ({
-            id: thread.no,
-            title: thread.sub,
-            content: thread.com,
-            comments: commentMap[thread.no].map(comment => ({
-                id: comment.no,
-                content: comment.com,
-            })),
-        }));
+        return results;
     }
 }

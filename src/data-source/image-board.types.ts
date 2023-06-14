@@ -46,7 +46,7 @@ export namespace CatalogAPIResponse {
         threads: Thread[];
     }
 
-    export interface Thread {
+    export interface BaseThread {
         no: number;
         sticky?: number;
         closed?: number;
@@ -54,16 +54,7 @@ export namespace CatalogAPIResponse {
         name: string;
         sub?: string;
         com: string;
-        filename: string;
-        ext: string;
-        w: number;
-        h: number;
-        tn_w: number;
-        tn_h: number;
-        tim: number;
         time: number;
-        md5: string;
-        fsize: number;
         resto: number;
         capcode?: string;
         semantic_url: string;
@@ -75,6 +66,18 @@ export namespace CatalogAPIResponse {
         last_modified: number;
         bumplimit?: number;
         imagelimit?: number;
+    }
+
+    export interface AttachmentThread extends BaseThread {
+        tim: number;
+        filename: string;
+        ext: string;
+        fsize: number;
+        md5: string;
+        w: number;
+        h: number;
+        tn_w: number;
+        tn_h: number;
     }
 
     export interface LastReply {
@@ -95,6 +98,8 @@ export namespace CatalogAPIResponse {
         resto: number;
         capcode?: string;
     }
+
+    export type Thread = BaseThread | AttachmentThread;
 }
 
 export namespace ThreadsAPIResponse {
@@ -102,7 +107,7 @@ export namespace ThreadsAPIResponse {
         posts: Post[];
     }
 
-    export interface Post {
+    export interface BasePost {
         no: number;
         sticky?: number;
         closed?: number;
@@ -110,16 +115,7 @@ export namespace ThreadsAPIResponse {
         name: string;
         sub?: string;
         com: string;
-        filename?: string;
-        ext?: string;
-        w?: number;
-        h?: number;
-        tn_w?: number;
-        tn_h?: number;
-        tim?: number;
         time: number;
-        md5?: string;
-        fsize?: number;
         resto: number;
         capcode: string;
         semantic_url?: string;
@@ -127,4 +123,18 @@ export namespace ThreadsAPIResponse {
         images?: number;
         unique_ips?: number;
     }
+
+    export interface AttachmentPost extends BasePost {
+        tim: number;
+        filename: string;
+        ext: string;
+        fsize: number;
+        md5: string;
+        w: number;
+        h: number;
+        tn_w: number;
+        tn_h: number;
+    }
+
+    export type Post = BasePost | AttachmentPost;
 }
