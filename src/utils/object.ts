@@ -1,3 +1,5 @@
+import { DeepPartial } from "typeorm";
+
 import { Fn } from "@utils/types";
 
 export function pickByDeep<T extends Record<string, unknown>>(object: T, fn: Fn<[string, any], boolean>): T {
@@ -24,4 +26,14 @@ export function pickByDeep<T extends Record<string, unknown>>(object: T, fn: Fn<
     }
 
     return result as T;
+}
+
+export function assign<T extends Record<string, any>>(entity: T, data: DeepPartial<T>) {
+    Object.entries(data).forEach(([key, value]) => {
+        if (value === undefined) {
+            return;
+        }
+
+        (entity as any)[key] = value;
+    });
 }

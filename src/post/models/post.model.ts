@@ -1,6 +1,7 @@
-import { Entity, BaseEntity, Column, ManyToOne, RelationId, PrimaryColumn } from "typeorm";
+import { Entity, BaseEntity, Column, ManyToOne, RelationId, PrimaryColumn, OneToMany } from "typeorm";
 
 import { Thread } from "@thread/models/thread.model";
+import { Attachment, RawAttachment } from "@attachment/models/attachment.model";
 
 import { AsRawType, Nullable } from "@utils/types";
 
@@ -24,6 +25,15 @@ export class Post extends BaseEntity {
 
     @RelationId((item: Post) => item.thread)
     public threadId!: Thread["id"];
+
+    // Post => Attachment[]
+    @OneToMany(() => Attachment, item => item.post)
+    public attachments!: Attachment[];
+
+    @RelationId((item: Post) => item.attachments)
+    public attachmentIds!: Attachment["id"][];
 }
 
-export type RawPost = AsRawType<Post>;
+export type RawPost = AsRawType<Post> & {
+    attachments: RawAttachment[];
+};

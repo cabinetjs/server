@@ -1,9 +1,12 @@
+import _ from "lodash";
+
 import { BoardAPIResponse, CatalogAPIResponse, ThreadsAPIResponse } from "@data-source/types/image-board.types";
 import { BaseDataSource, BaseDataSourceOption } from "@data-source/types/base";
 
 import { RawBoard } from "@board/models/board.model";
 
 import { Fetcher } from "@utils/fetcher";
+import { RawAttachment } from "@attachment/models/attachment.model";
 
 export interface ImageBoardFilter {
     title?: string;
@@ -93,6 +96,7 @@ export class ImageBoardDataSource extends BaseDataSource<"ImageBoard", ImageBoar
             let board = results.find(board => board.code === boardCode);
             if (!board) {
                 board = {
+                    id: `${this.name}::${boardCode}`,
                     code: targetBoard.board,
                     name: targetBoard.title,
                     description: targetBoard.meta_description,
@@ -112,22 +116,44 @@ export class ImageBoardDataSource extends BaseDataSource<"ImageBoard", ImageBoar
                 throw new Error(`Failed to find op post with id '${opPostId}'`);
             }
 
+            const threadUri = `${board.id}::${opPostId}`;
+
             board.threads.push({
+                id: threadUri,
                 openingPost: {
+                    id: `${threadUri}::${opPost.no}`,
                     no: opPost.no,
                     title: opPost.sub,
                     content: opPost.com,
+                    attachments: _.compact([this.getAttachment(boardCode, opPost)]),
                 },
                 replies: posts
                     .filter(post => post.no !== opPostId)
                     .map(reply => ({
+                        id: `${threadUri}::${reply.no}`,
                         no: reply.no,
                         title: reply.sub,
                         content: reply.com,
+                        attachments: _.compact([this.getAttachment(boardCode, reply)]),
                     })),
             });
         }
 
         return results;
+    }
+
+    private getAttachment(boardCode: string, post: ThreadsAPIResponse.Post): RawAttachment | null {
+        if (!("tim" in post)) {
+            return null;
+        }
+
+        return {
+            id: `${this.name}::${boardCode}::${post.tim}`,
+            url: `https://i.4cdn.org/${boardCode}/${post.tim}${post.ext}`,
+            size: post.fsize,
+            name: post.filename,
+            extension: post.ext,
+            hash: post.md5,
+        };
     }
 }

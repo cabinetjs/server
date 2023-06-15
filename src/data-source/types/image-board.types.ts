@@ -124,7 +124,7 @@ export namespace ThreadsAPIResponse {
         unique_ips?: number;
     }
 
-    export interface AttachmentPost extends BasePost {
+    export interface Attachment {
         tim: number;
         filename: string;
         ext: string;
@@ -136,5 +136,5 @@ export namespace ThreadsAPIResponse {
         tn_h: number;
     }
 
-    export type Post = BasePost | AttachmentPost;
+    export type Post = BasePost | (BasePost & Attachment);
 }

@@ -11,7 +11,7 @@ export class Thread extends BaseEntity {
     public id!: string;
 
     // Thread => Post
-    @OneToOne(() => Post)
+    @OneToOne(() => Post, { cascade: true })
     @JoinColumn()
     public openingPost!: Post;
 

@@ -28,7 +28,9 @@
             "@post/*": ["src/post/*"],
             "@thread/*": ["src/thread/*"],
             "@board/*": ["src/board/*"],
-            "@common/*": ["src/common/*"]
+            "@common/*": ["src/common/*"],
+            "@attachment/*": ["src/attachment/*"],
+            "@database/*": ["src/database/*"]
         },
         "plugins": [
             {

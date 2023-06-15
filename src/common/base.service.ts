@@ -1,4 +1,5 @@
-import { BaseEntity, DeepPartial, Repository, FindOptionsWhere } from "typeorm";
+import _ from "lodash";
+import { BaseEntity, DeepPartial, Repository } from "typeorm";
 
 export abstract class BaseService<TEntity extends BaseEntity, RawType extends DeepPartial<TEntity>> {
     protected constructor(
@@ -6,8 +7,10 @@ export abstract class BaseService<TEntity extends BaseEntity, RawType extends De
         protected readonly repository: Repository<TEntity>,
     ) {}
 
-    public async find(where?: FindOptionsWhere<TEntity>): Promise<TEntity[]> {
-        return this.repository.find({ where });
+    public async getIdMap(): Promise<Record<string, TEntity>> {
+        const entities = await this.repository.find();
+
+        return _.keyBy(entities, "id");
     }
 
     public create(): TEntity;
