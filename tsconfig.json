@@ -19,6 +19,7 @@
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
         "esModuleInterop": true,
+        "resolveJsonModule": true,
         "paths": {
             "@root/*": ["src/*"],
             "@data-source/*": ["src/data-source/*"],
