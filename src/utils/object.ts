@@ -1,6 +1,5 @@
-import { DeepPartial } from "typeorm";
-
-import { Fn } from "@utils/types";
+import { Fn, Nullable } from "@utils/types";
+import _ from "lodash";
 
 export function pickByDeep<T extends Record<string, unknown>>(object: T, fn: Fn<[string, any], boolean>): T {
     if (object === null || typeof object !== "object") {
@@ -28,12 +27,55 @@ export function pickByDeep<T extends Record<string, unknown>>(object: T, fn: Fn<
     return result as T;
 }
 
-export function assign<T extends Record<string, any>>(entity: T, data: DeepPartial<T>) {
-    Object.entries(data).forEach(([key, value]) => {
-        if (value === undefined) {
-            return;
+export function isPrimitive(value: unknown): value is string | number | boolean | null | undefined | Date {
+    return (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean" ||
+        value === null ||
+        value === undefined ||
+        value instanceof Date
+    );
+}
+
+export function isEqual<T extends Record<string, any>>(left: Nullable<T>, right: Nullable<T>) {
+    if (!left && !right) {
+        return true;
+    }
+
+    if (!left || !right) {
+        return false;
+    }
+
+    const leftKeys = Object.keys(left).filter(k => isPrimitive(left[k]));
+    const rightKeys = Object.keys(right).filter(k => isPrimitive(right[k]));
+
+    if (leftKeys.length !== rightKeys.length || _.difference(leftKeys, rightKeys).length > 0) {
+        return false;
+    }
+
+    for (const key of leftKeys) {
+        const leftValue = left[key];
+        const rightValue = right[key];
+
+        const isLeftNullish = leftValue === null || leftValue === undefined;
+        const isRightNullish = rightValue === null || rightValue === undefined;
+        if (isLeftNullish && isRightNullish) {
+            continue;
+        } else if (isLeftNullish || isRightNullish) {
+            return false;
         }
 
-        (entity as any)[key] = value;
-    });
+        if (leftValue instanceof Date && rightValue instanceof Date) {
+            if (leftValue.getTime() !== rightValue.getTime()) {
+                return false;
+            }
+        }
+
+        if (leftValue !== rightValue) {
+            return false;
+        }
+    }
+
+    return true;
 }

@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, Column, ManyToOne, RelationId, PrimaryColumn, OneToMany } from "typeorm";
+import { Entity, BaseEntity, Column, ManyToOne, PrimaryColumn, OneToMany } from "typeorm";
 
 import { Thread } from "@thread/models/thread.model";
 import { Attachment, RawAttachment } from "@attachment/models/attachment.model";
@@ -23,15 +23,9 @@ export class Post extends BaseEntity {
     @ManyToOne(() => Thread, item => item.replies)
     public thread!: Thread;
 
-    @RelationId((item: Post) => item.thread)
-    public threadId!: Thread["id"];
-
     // Post => Attachment[]
     @OneToMany(() => Attachment, item => item.post)
     public attachments!: Attachment[];
-
-    @RelationId((item: Post) => item.attachments)
-    public attachmentIds!: Attachment["id"][];
 }
 
 export type RawPost = AsRawType<Post> & {

@@ -9,6 +9,8 @@ import { DataSourceService } from "@data-source/data-source.service";
 import { Config } from "@config/config.module";
 import { InjectConfig } from "@config/config.decorator";
 
+import { RawBoard } from "@board/models/board.model";
+
 import { formatInterval, isCronExpression } from "@utils/date";
 import { Logger } from "@utils/logger";
 
@@ -54,10 +56,12 @@ export class CrawlerService implements OnModuleInit {
     private async onWork() {
         this.logger.log(`Crawling task started`);
 
-        for await (const [dataSourceName, data] of this.dataSourceService.crawl()) {
-            await this.databaseService.write(dataSourceName, data);
+        const boards: RawBoard[] = [];
+        for await (const [, data] of this.dataSourceService.crawl()) {
+            boards.push(...data);
         }
 
+        await this.databaseService.write(boards);
         this.logger.log(`Crawling task finished successfully`);
     }
     private async onWorkError(error: Error) {

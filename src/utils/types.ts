@@ -7,6 +7,9 @@ export type Fn<TArgs, TReturn> = TArgs extends never
     : (arg: TArgs) => TReturn;
 
 export type StringKeyOf<T> = Exclude<keyof T, symbol | number>;
+export type SelectOnly<T, U> = {
+    [K in keyof T as T[K] extends U ? K : never]: T[K];
+};
 
 export type Nullable<T> = T | null | undefined;
 
