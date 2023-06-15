@@ -7,7 +7,6 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
         "target": "es2017",
         "sourceMap": true,
         "outDir": "./dist",
@@ -16,22 +15,24 @@
         "skipLibCheck": true,
         "strictNullChecks": true,
         "noImplicitAny": false,
-        "strictBindCallApply": false,
+        "strictBindCallApply": true,
         "forceConsistentCasingInFileNames": false,
         "noFallthroughCasesInSwitch": false,
+        "esModuleInterop": true,
         "paths": {
             "@root/*": ["src/*"],
-            "@utils/*": ["src/utils/*"],
-            "@data-source": ["src/data-source"],
             "@data-source/*": ["src/data-source/*"],
-            "@database": ["src/database"],
-            "@database/*": ["src/database/*"],
+            "@config/*": ["src/config/*"],
+            "@crawler/*": ["src/crawler/*"],
+            "@utils/*": ["src/utils/*"],
+            "@post/*": ["src/post/*"],
+            "@thread/*": ["src/thread/*"],
+            "@board/*": ["src/board/*"],
+            "@common/*": ["src/common/*"]
         },
         "plugins": [
             {
                 "transform": "typia/lib/transform"
-                // "functional": true, // validate function type
-                // "numeric": true, // check `isNaN()` and `isFinite()`
             }
         ]
     }

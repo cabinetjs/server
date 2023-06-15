@@ -1,31 +1,50 @@
 import fs from "fs-extra";
+import { application, IJsonApplication } from "typia";
 import Ajv from "ajv";
 import betterAjvErrors from "better-ajv-errors";
-import { application, IJsonApplication } from "typia";
 
-import { createDataSource, DataSourceOptions, DataSourceTypes } from "@data-source";
+import { DynamicModule } from "@nestjs/common";
+
+import { DataSourceOptions } from "@data-source/types";
 
 import { InvalidConfigError } from "@utils/errors/invalid-config";
 import { composeJsonSchema } from "@utils/json";
 import { Logger } from "@utils/logger";
 
-export interface ConfigData {
+export const CONFIG_DATA = Symbol("CONFIG_DATA");
+
+export interface Config {
     dataSources: DataSourceOptions[];
     crawlInterval: number | string;
 }
 
-const DEFAULT_CONFIG: ConfigData = {
+const DEFAULT_CONFIG: Config = {
     dataSources: [],
-    crawlInterval: "0 */1 * * *",
+    crawlInterval: 1800000,
 };
 
-export class ConfigManager {
-    private static readonly configSchema: IJsonApplication = application<[ConfigData], "ajv">();
-    private static readonly logger: Logger = new Logger(ConfigManager.name);
+export class ConfigModule {
+    private static readonly configSchema: IJsonApplication = application<[Config], "ajv">();
+    private static readonly logger: Logger = new Logger(ConfigModule.name);
     private static readonly ajv = new Ajv();
 
-    public static async initialize(filePath: string): Promise<ConfigManager> {
-        const schema = await composeJsonSchema<ConfigData>(ConfigManager.configSchema);
+    public static forRoot(): DynamicModule {
+        return {
+            module: ConfigModule,
+            imports: [],
+            providers: [
+                {
+                    provide: CONFIG_DATA,
+                    useFactory: () => ConfigModule.loadConfig("./cabinet.config.json"),
+                },
+            ],
+            exports: [CONFIG_DATA],
+            global: true,
+        };
+    }
+
+    private static async loadConfig(filePath: string): Promise<Config> {
+        const schema = await composeJsonSchema<Config>(ConfigModule.configSchema);
         if (!filePath) {
             throw new Error("Config file path is not defined");
         }
@@ -41,7 +60,7 @@ export class ConfigManager {
             });
         }
 
-        const configData = await this.logger.doWork({
+        return this.logger.doWork({
             level: "log",
             message: `Load configuration from {cyan}`,
             args: [`'${filePath}'`],
@@ -57,7 +76,7 @@ export class ConfigManager {
                 }
 
                 const configData = await fs.readJSON(filePath);
-                const validate = ConfigManager.ajv.compile(schema);
+                const validate = ConfigModule.ajv.compile(schema);
                 const valid = validate(configData);
                 if (!valid && validate.errors) {
                     const error = betterAjvErrors(schema, configData, validate.errors, {
@@ -73,22 +92,5 @@ export class ConfigManager {
                 return configData;
             },
         });
-
-        return new ConfigManager(configData);
-    }
-
-    private readonly _config: ConfigData;
-
-    public get config(): ConfigData {
-        return { ...this._config };
-    }
-    public get dataSources(): DataSourceTypes[] {
-        return this._config.dataSources.map(dataSourceOption => {
-            return createDataSource(dataSourceOption);
-        });
-    }
-
-    private constructor(config: ConfigData) {
-        this._config = config;
     }
 }

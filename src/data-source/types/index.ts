@@ -1,5 +1,5 @@
-import { ImageBoardDataSource } from "@data-source/image-board";
-import { BaseDataSource, BaseDataSourceOption } from "@data-source/base";
+import { BaseDataSource, BaseDataSourceOption } from "@data-source/types/base";
+import { ImageBoardDataSource } from "@data-source/types/image-board";
 
 export type DataSourceTypes = ImageBoardDataSource;
 export type DataSourceOptions = DataSourceTypes["options"];

@@ -4,7 +4,7 @@ import { StringKeyOf } from "@utils/types";
 import { buildSearchParams } from "@utils/url";
 
 export interface FetchOptions {
-    method: "GET" | "POST";
+    method?: "GET" | "POST";
     headers?: Record<string, string>;
     params?: Record<string, string | number>;
 }
@@ -20,7 +20,7 @@ export class Fetcher<TEndpointMap extends Record<string, any>> {
         endpoint: Endpoint,
         options?: FetchOptions,
     ): Promise<Response> {
-        const { method, headers = {}, params } = options || { method: "GET" };
+        const { method = "GET", headers = {}, params } = options ?? {};
         const url = `${this.baseUrl}${endpoint}`;
         let urlWithParams = url;
         if (params) {

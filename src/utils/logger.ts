@@ -3,7 +3,6 @@ import chalk from "chalk";
 
 import { Fn } from "@utils/types";
 import { getTimestamp } from "@utils/date";
-import * as process from "process";
 
 type LogLevel = "log" | "info" | "warn" | "error" | "debug" | "verbose";
 
@@ -46,7 +45,10 @@ interface LogOption {
     breakLine?: boolean;
     withoutPrefixes?: boolean;
     force?: boolean;
+    context?: string;
 }
+
+const BLACKLISTED_CONTEXTS = ["InstanceLoader", "NestFactory", "NestApplication"];
 
 export class Logger implements LoggerFunctions {
     private static isLocked = false;
@@ -118,48 +120,23 @@ export class Logger implements LoggerFunctions {
         return result;
     }
 
-    public log(message: string, ...args: any[]): void {
-        this.printLog({
-            level: "log",
-            message,
-            args,
-        });
+    public log(message: string, context?: string, ...args: any[]): void {
+        this.printLog({ level: "log", message, args, context });
     }
-    public info(message: string, ...args: any[]): void {
-        this.printLog({
-            level: "info",
-            message,
-            args,
-        });
+    public info(message: string, context?: string, ...args: any[]): void {
+        this.printLog({ level: "info", message, args, context });
     }
-    public warn(message: string, ...args: any[]): void {
-        this.printLog({
-            level: "warn",
-            message,
-            args,
-        });
+    public warn(message: string, context?: string, ...args: any[]): void {
+        this.printLog({ level: "warn", message, args, context });
     }
-    public error(message: string, stack?: string, ...args: any[]): void {
-        this.printLog({
-            level: "error",
-            message,
-            args,
-            stack,
-        });
+    public error(message: string, stack?: string, context?: string, ...args: any[]): void {
+        this.printLog({ level: "error", message, args, stack, context });
     }
-    public verbose(message: string, ...args: any[]): void {
-        this.printLog({
-            level: "verbose",
-            message,
-            args,
-        });
+    public verbose(message: string, context?: string, ...args: any[]): void {
+        this.printLog({ level: "verbose", message, args, context });
     }
-    public debug(message: string, ...args: any[]): void {
-        this.printLog({
-            level: "debug",
-            message,
-            args,
-        });
+    public debug(message: string, context?: string, ...args: any[]): void {
+        this.printLog({ level: "debug", message, args, context });
     }
 
     private printLog({
@@ -170,9 +147,13 @@ export class Logger implements LoggerFunctions {
         withoutPrefixes = false,
         force = false,
         args = [],
+        context: name = this.name || Logger.name,
     }: LogOption): void {
+        if (BLACKLISTED_CONTEXTS.includes(name)) {
+            return;
+        }
+
         const colorize = COLOR_FUNCTION_MAP[level];
-        const name = this.name ?? "Logger";
         const currentTime = dayjs();
         const prefixes = [
             colorize(level.toUpperCase().padStart(7, " ")),
