@@ -52,6 +52,12 @@ jobs:
               run: |
                   yarn build
 
+            - name: Release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+              run: npx semantic-release
+
             - uses: sarisia/actions-status-discord@v1
               if: always()
               with:
