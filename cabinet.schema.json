@@ -89,6 +89,9 @@
                         "region": {
                             "type": "string"
                         },
+                        "endpoint": {
+                            "type": "string"
+                        },
                         "credentials": {
                             "type": "object",
                             "properties": {
