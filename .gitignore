@@ -3,3 +3,5 @@
 /yarn-error.log
 /cabinet.config.json
 /database.sqlite
+/downloads
+/dist
