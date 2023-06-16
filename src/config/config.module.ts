@@ -35,14 +35,14 @@ export class ConfigModule {
     private static readonly logger: Logger = new Logger(ConfigModule.name);
     private static readonly ajv = new Ajv();
 
-    public static forRoot(configFilePath: string): DynamicModule {
+    public static forRoot(config: Config): DynamicModule {
         return {
             module: ConfigModule,
             imports: [],
             providers: [
                 {
                     provide: CONFIG_DATA,
-                    useFactory: () => ConfigModule.loadConfig(configFilePath),
+                    useValue: config,
                 },
             ],
             exports: [CONFIG_DATA],
@@ -50,7 +50,7 @@ export class ConfigModule {
         };
     }
 
-    private static async loadConfig(filePath: string): Promise<Config> {
+    public static async loadConfig(filePath: string): Promise<Config> {
         const schema = await composeJsonSchema<Config>(ConfigModule.configSchema);
         if (!filePath) {
             throw new Error("Config file path is not defined");

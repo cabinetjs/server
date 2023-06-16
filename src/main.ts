@@ -7,6 +7,7 @@ import { CrawlerService } from "@crawler/crawler.service";
 
 import { drawLine, printTitle, TITLE_WIDTH } from "@utils/cli";
 import { Logger } from "@utils/logger";
+import { ConfigModule } from "@config/config.module";
 
 interface CLIOptions {
     config: string;
@@ -27,7 +28,8 @@ async function bootstrap() {
     printTitle(pkg.version);
     drawLine(TITLE_WIDTH * 1.5, "=");
 
-    const app = await NestFactory.create(AppModule.forRoot(configPath, options.dropDatabase), {
+    const config = await ConfigModule.loadConfig(configPath);
+    const app = await NestFactory.create(AppModule.forRoot(config, options.dropDatabase), {
         logger: new Logger(),
     });
 
