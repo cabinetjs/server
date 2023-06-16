@@ -7,6 +7,7 @@ import { RawBoard } from "@board/models/board.model";
 
 import { Fetcher } from "@utils/fetcher";
 import { RawAttachment } from "@attachment/models/attachment.model";
+import { RawPost } from "@post/models/post.model";
 
 export interface ImageBoardFilter {
     title?: string;
@@ -100,46 +101,43 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
                     code: targetBoard.board,
                     name: targetBoard.title,
                     description: targetBoard.meta_description,
-
-                    threads: [],
+                    posts: [],
                 };
 
                 results.push(board);
             }
 
-            const { posts } = await this.fetcher.fetchJson("/{board}/thread/{thread}.json", {
+            const {
+                posts: [rawOpPost, ...rawReplies],
+            } = await this.fetcher.fetchJson("/{board}/thread/{thread}.json", {
                 params: { board: boardCode, thread: opPostId },
             });
 
-            const opPost = posts.find(post => post.no === opPostId);
-            if (!opPost) {
-                throw new Error(`Failed to find op post with id '${opPostId}'`);
-            }
+            const parentBoard = board;
+            const opPost = this.buildPost(boardCode, parentBoard, rawOpPost);
+            const replies = rawReplies.map(rawReply => this.buildPost(boardCode, parentBoard, rawReply, opPost));
 
-            const threadUri = `${board.id}::${opPostId}`;
-
-            board.threads.push({
-                id: threadUri,
-                openingPost: {
-                    id: `${threadUri}::${opPost.no}`,
-                    no: opPost.no,
-                    title: opPost.sub,
-                    content: opPost.com,
-                    attachments: _.compact([this.getAttachment(boardCode, opPost)]),
-                },
-                replies: posts
-                    .filter(post => post.no !== opPostId)
-                    .map(reply => ({
-                        id: `${threadUri}::${reply.no}`,
-                        no: reply.no,
-                        title: reply.sub,
-                        content: reply.com,
-                        attachments: _.compact([this.getAttachment(boardCode, reply)]),
-                    })),
-            });
+            parentBoard.posts ??= [];
+            parentBoard.posts.push(opPost, ...replies);
         }
 
         return results;
+    }
+
+    private buildPost(
+        boardCode: string,
+        board: RawBoard,
+        rawPost: ThreadsAPIResponse.Post,
+        parent?: RawPost,
+    ): RawBoard["posts"][0] {
+        return {
+            id: `${board.id}::${rawPost.no}`,
+            parent: parent?.id,
+            no: rawPost.no,
+            title: rawPost.sub,
+            content: rawPost.com,
+            attachments: _.compact([this.getAttachment(boardCode, rawPost)]),
+        };
     }
 
     private getAttachment(boardCode: string, post: ThreadsAPIResponse.Post): RawAttachment | null {

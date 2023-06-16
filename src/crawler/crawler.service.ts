@@ -1,8 +1,8 @@
 import ms from "ms";
 import { CronJob, Job, SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
-import { EventEmitter2 } from "@nestjs/event-emitter";
 
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 import { DatabaseService } from "@database/database.service";
 import { DataSourceService } from "@data-source/data-source.service";
@@ -16,6 +16,7 @@ import { RawBoard } from "@board/models/board.model";
 
 import { formatInterval, isCronExpression } from "@utils/date";
 import { Logger } from "@utils/logger";
+import pluralize from "pluralize";
 
 @Injectable()
 export class CrawlerService implements OnModuleInit {
@@ -61,12 +62,24 @@ export class CrawlerService implements OnModuleInit {
         try {
             this.logger.log(`Crawling task started`);
 
-            const boards: RawBoard[] = [];
+            const rawBoards: RawBoard[] = [];
             for await (const [, data] of this.dataSourceService.crawl()) {
-                boards.push(...data);
+                rawBoards.push(...data);
             }
 
-            const { attachments } = await this.databaseService.write(boards);
+            const { attachments, boards, posts } = await this.databaseService.write(rawBoards);
+            this.logger.log(
+                `Crawled {cyan}.`,
+                undefined,
+                [
+                    `${boards.length} ${pluralize("board", boards.length)}`,
+                    `${posts.length} ${pluralize("post", posts.length)}`,
+                    `${attachments.length} ${pluralize("attachment", attachments.length)}`,
+                ]
+                    .filter(t => !t.startsWith("0"))
+                    .join(", "),
+            );
+
             this.eventEmitter.emit("attachment.created", new AttachmentCreatedEvent(attachments));
 
             this.logger.log(`Crawling task finished successfully`);

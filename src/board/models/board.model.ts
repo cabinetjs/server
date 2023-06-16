@@ -1,8 +1,8 @@
-import { Entity, BaseEntity, Column, OneToMany, RelationId, PrimaryColumn } from "typeorm";
-
-import { RawThread, Thread } from "@thread/models/thread.model";
+import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn, RelationId } from "typeorm";
 
 import { AsRawType } from "@utils/types";
+
+import { Post, RawPost } from "@post/models/post.model";
 
 @Entity({ name: "boards" })
 export class Board extends BaseEntity {
@@ -18,14 +18,14 @@ export class Board extends BaseEntity {
     @Column({ type: "text" })
     public description!: string;
 
-    // Board => Thread[]
-    @OneToMany(() => Thread, item => item.board)
-    public threads!: Thread[];
+    // Board => Post[]
+    @OneToMany(() => Post, item => item.board)
+    public posts!: Post[];
 
-    @RelationId((item: Board) => item.threads)
-    public threadIds!: Thread["id"][];
+    @RelationId((item: Board) => item.posts)
+    public postIds!: Post["id"][];
 }
 
 export type RawBoard = AsRawType<Board> & {
-    threads: RawThread[];
+    posts: RawPost[];
 };

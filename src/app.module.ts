@@ -7,7 +7,6 @@ import { DataSourceModule } from "@data-source/data-source.module";
 import { CrawlerModule } from "@crawler/crawler.module";
 import { PostModule } from "@post/post.module";
 import { BoardModule } from "@board/board.module";
-import { ThreadModule } from "@thread/thread.module";
 import { AttachmentModule } from "@attachment/attachment.module";
 import { DatabaseModule } from "@database/database.module";
 import { StorageModule } from "@storage/storage.module";
@@ -38,7 +37,6 @@ export class AppModule {
                 DataSourceModule,
                 PostModule,
                 BoardModule,
-                ThreadModule,
                 AttachmentModule,
                 DatabaseModule,
                 StorageModule,

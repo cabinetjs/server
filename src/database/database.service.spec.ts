@@ -2,7 +2,6 @@ import { Test, TestingModule } from "@nestjs/testing";
 
 import { DatabaseService } from "@database/database.service";
 import { BoardService } from "@board/board.service";
-import { ThreadService } from "@thread/thread.service";
 import { PostService } from "@post/post.service";
 import { AttachmentService } from "@attachment/attachment.service";
 
@@ -16,11 +15,10 @@ describe("DatabaseService", () => {
                     module: class FakeModule {},
                     providers: [
                         { provide: BoardService, useValue: {} },
-                        { provide: ThreadService, useValue: {} },
                         { provide: PostService, useValue: {} },
                         { provide: AttachmentService, useValue: {} },
                     ],
-                    exports: [BoardService, ThreadService, PostService, AttachmentService],
+                    exports: [BoardService, PostService, AttachmentService],
                 },
             ],
             providers: [DatabaseService],
