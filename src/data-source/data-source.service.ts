@@ -1,14 +1,10 @@
-import { Repository } from "typeorm";
-
 import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
 
 import { Config } from "@config/config.module";
 import { InjectConfig } from "@config/config.decorator";
 
 import { RawBoard } from "@board/models/board.model";
 
-import { DataSource } from "@data-source/models/data-source.model";
 import { BaseDataSource } from "@data-source/types/base";
 import { createDataSource } from "@data-source/types";
 
@@ -17,10 +13,7 @@ export class DataSourceService implements OnApplicationBootstrap {
     private readonly dataSources: BaseDataSource[] = [];
     private readonly config: Config;
 
-    public constructor(
-        @InjectConfig() config: Config,
-        @InjectRepository(DataSource) private readonly dataSourceRepository: Repository<DataSource>,
-    ) {
+    public constructor(@InjectConfig() config: Config) {
         this.config = config;
     }
 
@@ -29,12 +22,6 @@ export class DataSourceService implements OnApplicationBootstrap {
             const dataSource = createDataSource(dataSourceOption);
             await dataSource.initialize();
 
-            const entity = this.dataSourceRepository.create({
-                type: dataSource.type,
-                name: dataSource.name,
-            });
-
-            await this.dataSourceRepository.save(entity);
             this.dataSources.push(dataSource);
         }
     }
