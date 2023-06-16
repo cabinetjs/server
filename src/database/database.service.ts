@@ -10,6 +10,7 @@ import { RawBoard } from "@board/models/board.model";
 
 import { Logger } from "@utils/logger";
 import _ from "lodash";
+import { RawAttachment } from "@attachment/models/attachment.model";
 
 @Injectable()
 export class DatabaseService {
@@ -33,7 +34,18 @@ export class DatabaseService {
         boards = this.mergeBoards(boards);
 
         const posts = boards.flatMap(board => board.posts);
-        const attachments = posts.flatMap(post => post.attachments);
+        const attachments: Array<RawAttachment & { isStored?: boolean }> = posts.flatMap(post => post.attachments);
+        const oldAttachments = await this.attachmentService.getIdMap(attachments.map(attachment => attachment.id));
+
+        for (const attachment of attachments) {
+            const oldAttachment = oldAttachments[attachment.id];
+            if (!oldAttachment) {
+                continue;
+            }
+
+            attachment.storageData = oldAttachment.storageData;
+            attachment.isStored = oldAttachment.isStored;
+        }
 
         return {
             attachments: await this.attachmentService.save(attachments),
