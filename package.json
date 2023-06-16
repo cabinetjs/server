@@ -1,6 +1,6 @@
 {
     "name": "@cabinetjs/server",
-    "version": "0.0.1",
+    "version": "1.0.0-dev.1",
     "description": "CabinetJS is a cli application for archiving web contents from various sources",
     "publishConfig": {
         "access": "public"
