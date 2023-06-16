@@ -5,6 +5,9 @@
     "author": "",
     "private": true,
     "license": "UNLICENSED",
+    "bin": {
+        "cabinet": "./bin/cabinet"
+    },
     "scripts": {
         "build": "nest build",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -32,6 +35,7 @@
         "async": "^3.2.4",
         "better-ajv-errors": "^1.2.0",
         "change-case": "^4.1.2",
+        "commander": "^11.0.0",
         "cron-parser": "^4.8.1",
         "croner": "^6.0.4",
         "cronstrue": "^2.27.0",

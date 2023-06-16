@@ -34,14 +34,14 @@ export class ConfigModule {
     private static readonly logger: Logger = new Logger(ConfigModule.name);
     private static readonly ajv = new Ajv();
 
-    public static forRoot(): DynamicModule {
+    public static forRoot(configFilePath: string): DynamicModule {
         return {
             module: ConfigModule,
             imports: [],
             providers: [
                 {
                     provide: CONFIG_DATA,
-                    useFactory: () => ConfigModule.loadConfig("./cabinet.config.json"),
+                    useFactory: () => ConfigModule.loadConfig(configFilePath),
                 },
             ],
             exports: [CONFIG_DATA],
@@ -59,9 +59,9 @@ export class ConfigModule {
             await this.logger.doWork({
                 level: "debug",
                 message: "JSON schema definition {cyan}",
-                args: [`'./cabinet.schema.json'`],
+                args: [`'${filePath}'`],
                 work: async () => {
-                    await fs.writeJSON(`cabinet.schema.json`, schema, { spaces: 4 });
+                    await fs.writeJSON(filePath, schema, { spaces: 4 });
                 },
             });
         }

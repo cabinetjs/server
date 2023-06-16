@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { DynamicModule, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 
@@ -12,33 +12,38 @@ import { AttachmentModule } from "@attachment/attachment.module";
 import { DatabaseModule } from "@database/database.module";
 import { StorageModule } from "@storage/storage.module";
 
-@Module({
-    imports: [
-        ConfigModule.forRoot(),
-        TypeOrmModule.forRoot({
-            type: "sqlite",
-            database: "database.sqlite",
-            entities: [__dirname + "/**/*.model{.ts,.js}"],
-            synchronize: true,
-            dropSchema: true,
-        }),
-        EventEmitterModule.forRoot({
-            wildcard: false,
-            delimiter: ".",
-            newListener: false,
-            removeListener: false,
-            maxListeners: 10,
-            verboseMemoryLeak: false,
-            ignoreErrors: false,
-        }),
-        DataSourceModule,
-        PostModule,
-        BoardModule,
-        ThreadModule,
-        AttachmentModule,
-        DatabaseModule,
-        StorageModule,
-        CrawlerModule,
-    ],
-})
-export class AppModule {}
+@Module({})
+export class AppModule {
+    public static forRoot(configFilePath: string): DynamicModule {
+        return {
+            module: AppModule,
+            imports: [
+                ConfigModule.forRoot(configFilePath),
+                TypeOrmModule.forRoot({
+                    type: "sqlite",
+                    database: "database.sqlite",
+                    entities: [__dirname + "/**/*.model{.ts,.js}"],
+                    synchronize: true,
+                    dropSchema: true,
+                }),
+                EventEmitterModule.forRoot({
+                    wildcard: false,
+                    delimiter: ".",
+                    newListener: false,
+                    removeListener: false,
+                    maxListeners: 10,
+                    verboseMemoryLeak: false,
+                    ignoreErrors: false,
+                }),
+                DataSourceModule,
+                PostModule,
+                BoardModule,
+                ThreadModule,
+                AttachmentModule,
+                DatabaseModule,
+                StorageModule,
+                CrawlerModule,
+            ],
+        };
+    }
+}
