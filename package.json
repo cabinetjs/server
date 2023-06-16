@@ -1,13 +1,25 @@
 {
     "name": "cabinet-server",
     "version": "0.0.1",
-    "description": "",
-    "author": "",
-    "private": true,
-    "license": "UNLICENSED",
+    "description": "CabinetJS is a cli application for archiving web contents from various sources",
+    "publishConfig": {
+        "access": "public"
+    },
+    "author": {
+        "name": "Sophia",
+        "email": "me@sophia-dev.io",
+        "url": "https://github.com/async3619"
+    },
+    "license": "MIT",
     "bin": {
         "cabinet": "./bin/cabinet"
     },
+    "files": [
+        "dist",
+        "yarn.lock",
+        "bin",
+        "package.json"
+    ],
     "scripts": {
         "build": "nest build",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
