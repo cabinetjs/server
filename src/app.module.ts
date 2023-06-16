@@ -13,7 +13,7 @@ import { StorageModule } from "@storage/storage.module";
 
 @Module({})
 export class AppModule {
-    public static forRoot(configFilePath: string): DynamicModule {
+    public static forRoot(configFilePath: string, dropDatabase: boolean): DynamicModule {
         return {
             module: AppModule,
             imports: [
@@ -21,9 +21,11 @@ export class AppModule {
                 TypeOrmModule.forRoot({
                     type: "sqlite",
                     database: "database.sqlite",
-                    entities: [__dirname + "/**/*.model{.ts,.js}"],
-                    synchronize: true,
-                    dropSchema: true,
+                    entities: [`${__dirname}/**/*.model{.ts,.js}`],
+                    migrations: [`${__dirname}/migrations/**/*{.ts,.js}`],
+                    dropSchema: dropDatabase,
+                    autoLoadEntities: true,
+                    migrationsRun: true,
                 }),
                 EventEmitterModule.forRoot({
                     wildcard: false,
