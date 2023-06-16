@@ -59,9 +59,9 @@ export class ConfigModule {
             await this.logger.doWork({
                 level: "debug",
                 message: "JSON schema definition {cyan}",
-                args: [`'${filePath}'`],
+                args: [`'./cabinet.schema.json'`],
                 work: async () => {
-                    await fs.writeJSON(filePath, schema, { spaces: 4 });
+                    await fs.writeJSON(`cabinet.schema.json`, schema, { spaces: 4 });
                 },
             });
         }

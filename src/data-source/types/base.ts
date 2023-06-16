@@ -1,3 +1,5 @@
+import { pascalCase } from "change-case";
+
 import { RawBoard } from "@board/models/board.model";
 
 import { Logger } from "@utils/logger";
@@ -13,8 +15,8 @@ export abstract class BaseDataSource<
 > {
     protected readonly logger: Logger;
     protected readonly options: TOptions;
-
     public readonly type: Type;
+
     public get name(): string {
         return this.options.name;
     }
@@ -22,7 +24,7 @@ export abstract class BaseDataSource<
     protected constructor(type: Type, options: TOptions) {
         this.type = type;
         this.options = options;
-        this.logger = new Logger(this.type);
+        this.logger = new Logger(pascalCase(this.type));
     }
 
     protected abstract doInitialize(): Promise<void>;

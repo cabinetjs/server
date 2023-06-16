@@ -14,7 +14,7 @@ export interface ImageBoardFilter {
     caseSensitive?: boolean;
 }
 
-export interface ImageBoardDataSourceOptions extends BaseDataSourceOption<"ImageBoard"> {
+export interface ImageBoardDataSourceOptions extends BaseDataSourceOption<"image-board"> {
     url: string;
     boards: string[];
     filters?: ImageBoardFilter[];
@@ -28,12 +28,12 @@ interface FetcherResponseMap {
 
 type OpThreadPair = [string, CatalogAPIResponse.Thread];
 
-export class ImageBoardDataSource extends BaseDataSource<"ImageBoard", ImageBoardDataSourceOptions> {
+export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoardDataSourceOptions> {
     private readonly fetcher = new Fetcher<FetcherResponseMap>(this.options.url);
     private readonly targetBoards: BoardAPIResponse.Board[] = [];
 
     public constructor(options: ImageBoardDataSourceOptions) {
-        super("ImageBoard", options);
+        super("image-board", options);
     }
 
     protected async doInitialize(): Promise<void> {

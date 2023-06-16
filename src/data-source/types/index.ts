@@ -11,7 +11,7 @@ export type DataSourceFactoryMap = {
 };
 
 export const AVAILABLE_DATA_SOURCES: DataSourceFactoryMap = {
-    ImageBoard: options => new ImageBoardDataSource(options),
+    "image-board": options => new ImageBoardDataSource(options),
 };
 
 export const createDataSource = (options: DataSourceOptions): DataSourceTypes => {
