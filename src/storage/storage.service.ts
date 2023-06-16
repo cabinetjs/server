@@ -50,9 +50,7 @@ export class StorageService implements OnApplicationBootstrap {
         }
 
         await this.queue.push([...attachments]);
-        this.queue.drain().then(() => {
-            console.log(123);
-        });
+        this.queue.drain().then();
 
         const totalSize = _.sumBy(attachments, "size");
         this.logger.log(
