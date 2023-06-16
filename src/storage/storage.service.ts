@@ -35,12 +35,14 @@ export class StorageService implements OnApplicationBootstrap {
         @Inject(AttachmentService) private readonly attachmentService: AttachmentService,
     ) {
         this.config = config;
-        this.queue = async.queue(this.drainQueue.bind(this), 2);
+        this.queue = async.queue(this.drainQueue.bind(this), config.storingConcurrency ?? 1);
     }
 
     public async onApplicationBootstrap() {
         this.storageObject = createStorage(this.config.storage);
         await this.storageObject.initialize();
+
+        this.logger.log(`Storage initialized with concurrency {cyan}.`, undefined, this.config.storingConcurrency ?? 1);
     }
 
     public async store(attachments: ReadonlyArray<Attachment>) {

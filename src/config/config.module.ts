@@ -16,8 +16,9 @@ export const CONFIG_DATA = Symbol("CONFIG_DATA");
 
 export interface Config {
     dataSources: DataSourceOptions[];
-    crawlInterval: number | string;
     storage: StorageOptions;
+    crawlInterval: number | string;
+    storingConcurrency?: number;
 }
 
 const DEFAULT_CONFIG: Config = {

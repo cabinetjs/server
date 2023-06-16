@@ -50,16 +50,6 @@
                 ]
             }
         },
-        "crawlInterval": {
-            "oneOf": [
-                {
-                    "type": "string"
-                },
-                {
-                    "type": "number"
-                }
-            ]
-        },
         "storage": {
             "oneOf": [
                 {
@@ -121,11 +111,24 @@
                     ]
                 }
             ]
+        },
+        "crawlInterval": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                }
+            ]
+        },
+        "storingConcurrency": {
+            "type": "number"
         }
     },
     "required": [
         "dataSources",
-        "crawlInterval",
-        "storage"
+        "storage",
+        "crawlInterval"
     ]
 }
