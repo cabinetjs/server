@@ -61,21 +61,62 @@
             ]
         },
         "storage": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string"
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "path": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "local"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "path",
+                        "type"
+                    ]
                 },
-                "type": {
-                    "type": "string",
-                    "enum": [
-                        "local"
+                {
+                    "type": "object",
+                    "properties": {
+                        "bucketName": {
+                            "type": "string"
+                        },
+                        "region": {
+                            "type": "string"
+                        },
+                        "credentials": {
+                            "type": "object",
+                            "properties": {
+                                "accessKeyId": {
+                                    "type": "string"
+                                },
+                                "secretAccessKey": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "accessKeyId",
+                                "secretAccessKey"
+                            ]
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "s3"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "bucketName",
+                        "region",
+                        "type"
                     ]
                 }
-            },
-            "required": [
-                "path",
-                "type"
             ]
         }
     },
