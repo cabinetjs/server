@@ -27,6 +27,7 @@ export abstract class BaseStorage<
 
     protected abstract doInitialize(): Promise<void>;
     protected abstract doStore(attachment: Attachment): Promise<TData>;
+    protected abstract doCheckStored(attachment: Attachment): Promise<boolean>;
 
     public async initialize(): Promise<void> {
         return this.logger.doWork({
@@ -36,11 +37,20 @@ export abstract class BaseStorage<
             work: () => this.doInitialize(),
         });
     }
+
     public async store(attachment: Attachment): Promise<Attachment> {
         const data = await this.doStore(attachment);
         attachment.isStored = true;
         attachment.storageData = JSON.stringify(data);
 
         return attachment;
+    }
+
+    public async checkStored(attachment: Attachment): Promise<boolean> {
+        if (!attachment.isStored) {
+            return false;
+        }
+
+        return this.doCheckStored(attachment);
     }
 }

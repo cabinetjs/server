@@ -1,4 +1,6 @@
-import { CreateBucketCommand, HeadBucketCommand, PutObjectCommand, S3 } from "@aws-sdk/client-s3";
+import { is } from "typia";
+
+import { CreateBucketCommand, HeadBucketCommand, HeadObjectCommand, PutObjectCommand, S3 } from "@aws-sdk/client-s3";
 
 import { Attachment } from "@attachment/models/attachment.model";
 
@@ -61,5 +63,27 @@ export class S3Storage extends BaseStorage<"s3", S3StorageOptions, S3StorageData
             bucketName: this.options.bucketName,
             key: `${attachment.uid}${attachment.extension}`,
         };
+    }
+    public async doCheckStored(attachment: Attachment): Promise<boolean> {
+        if (!attachment.storageData) {
+            return false;
+        }
+
+        if (!is<S3StorageData>(attachment.storageData)) {
+            return false;
+        }
+
+        try {
+            await this.s3.send(
+                new HeadObjectCommand({
+                    Bucket: attachment.storageData.bucketName,
+                    Key: attachment.storageData.key,
+                }),
+            );
+        } catch {
+            return false;
+        }
+
+        return true;
     }
 }

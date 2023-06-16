@@ -1,10 +1,11 @@
+import path from "path";
 import fs from "fs-extra";
+import { is } from "typia";
 
 import { BaseStorage, BaseStorageOptions } from "@storage/types/base";
 import { Attachment } from "@attachment/models/attachment.model";
 
 import { Fetcher } from "@utils/fetcher";
-import * as path from "path";
 
 export interface LocalStorageOptions extends BaseStorageOptions<"local"> {
     path: string;
@@ -37,6 +38,7 @@ export class LocalStorage extends BaseStorage<"local", LocalStorageOptions, Loca
         await fs.ensureDir(targetPath);
         this.path = targetPath;
     }
+
     public async doStore(attachment: Attachment): Promise<LocalStorageData> {
         const buffer = await this.fetcher.download(attachment.url);
         const fileName = `${attachment.uid}${attachment.extension}`;
@@ -47,5 +49,24 @@ export class LocalStorage extends BaseStorage<"local", LocalStorageOptions, Loca
         return {
             path: targetPath,
         };
+    }
+
+    public async doCheckStored(attachment: Attachment): Promise<boolean> {
+        if (!attachment.storageData) {
+            return true;
+        }
+
+        const data = JSON.parse(attachment.storageData);
+        if (!is<LocalStorageData>(data)) {
+            return false;
+        }
+
+        const fileName = `${attachment.uid}${attachment.extension}`;
+        const targetPath = path.join(this.path, fileName);
+        if (data.path !== targetPath) {
+            return false;
+        }
+
+        return fs.existsSync(targetPath);
     }
 }

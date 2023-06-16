@@ -21,8 +21,6 @@ export class AttachmentService extends BaseService<Attachment, RawAttachment> {
 
     @OnEvent("attachment.created")
     public async handleAttachmentCreatedEvent({ attachments }: AttachmentCreatedEvent) {
-        const items = attachments.filter(a => !a.isStored);
-
-        await this.storageService.store(items);
+        await this.storageService.store(attachments);
     }
 }

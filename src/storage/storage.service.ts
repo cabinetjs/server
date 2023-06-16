@@ -45,8 +45,15 @@ export class StorageService implements OnApplicationBootstrap {
         this.logger.log(`Storage initialized with concurrency {cyan}.`, undefined, this.config.storingConcurrency ?? 1);
     }
 
-    public async store(attachments: ReadonlyArray<Attachment>) {
-        attachments = attachments.filter(attachment => !attachment.storageData);
+    public async store(targetAttachments: ReadonlyArray<Attachment>) {
+        const attachments: Attachment[] = [];
+        for (const attachment of targetAttachments) {
+            const isStored = await this.storage.checkStored(attachment);
+            if (!isStored) {
+                attachments.push(attachment);
+            }
+        }
+
         if (attachments.length === 0) {
             return [];
         }
