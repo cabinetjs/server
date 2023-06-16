@@ -4,6 +4,8 @@ import { getRepositoryToken } from "@nestjs/typeorm";
 import { AttachmentService } from "@attachment/attachment.service";
 import { Attachment } from "@attachment/models/attachment.model";
 
+import { StorageService } from "@storage/storage.service";
+
 import { repositoryMockFactory } from "../../test/repository.mock";
 
 describe("AttachmentService", () => {
@@ -14,6 +16,7 @@ describe("AttachmentService", () => {
             providers: [
                 AttachmentService,
                 { provide: getRepositoryToken(Attachment), useFactory: repositoryMockFactory },
+                { provide: StorageService, useValue: {} },
             ],
         }).compile();
 

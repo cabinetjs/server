@@ -183,13 +183,20 @@ export class Logger implements LoggerFunctions {
         if (Logger.isLocked && !force) {
             Logger.buffer += targetMessage;
             if (stack) {
-                Logger.buffer += `${stack.split("\n").slice(1).join("\n")}\n`;
+                Logger.buffer += `${this.stripStack(stack)}\n`;
             }
         } else {
             process.stdout.write(targetMessage);
             if (stack) {
-                console.log(stack.split("\n").slice(1).join("\n"));
+                console.log(this.stripStack(stack));
             }
         }
+    }
+
+    private stripStack(stack: string): string {
+        return stack
+            .split("\n")
+            .filter(line => line.trim().startsWith("at"))
+            .join("\n");
     }
 }

@@ -2,12 +2,15 @@ import { Entity, BaseEntity, Column, ManyToOne, RelationId, PrimaryColumn } from
 
 import { Post } from "@post/models/post.model";
 
-import { AsRawType } from "@utils/types";
+import { AsRawType, Nullable } from "@utils/types";
 
 @Entity({ name: "attachments" })
 export class Attachment extends BaseEntity {
     @PrimaryColumn({ type: "varchar", length: 255 })
     public id!: string;
+
+    @Column({ type: "varchar", length: 255 })
+    public uid!: string;
 
     @Column({ type: "text" })
     public url!: string;
@@ -24,6 +27,12 @@ export class Attachment extends BaseEntity {
     @Column({ type: "varchar", length: 255 })
     public hash!: string;
 
+    @Column({ type: "boolean", default: false })
+    public isStored!: boolean;
+
+    @Column({ type: "text", nullable: true })
+    public storageData?: Nullable<string>;
+
     // Attachment[] => Post
     @ManyToOne(() => Post, item => item.attachments)
     public post!: Post;
@@ -32,4 +41,4 @@ export class Attachment extends BaseEntity {
     public postId!: Post["id"];
 }
 
-export type RawAttachment = AsRawType<Attachment>;
+export type RawAttachment = Omit<AsRawType<Attachment>, "isStored">;

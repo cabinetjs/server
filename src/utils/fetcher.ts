@@ -11,12 +11,12 @@ export interface FetchOptions {
     retryCount?: number;
 }
 
-export class Fetcher<TEndpointMap extends Record<string, any>> {
+export class Fetcher<TEndpointMap extends Record<string, any> = never> {
     private readonly baseUrl: string;
     private readonly logger = new Logger(Fetcher.name);
 
-    public constructor(baseUrl: string) {
-        this.baseUrl = baseUrl;
+    public constructor(baseUrl?: string) {
+        this.baseUrl = baseUrl ?? "";
     }
 
     public async fetch<Endpoint extends StringKeyOf<TEndpointMap>>(
@@ -46,7 +46,6 @@ export class Fetcher<TEndpointMap extends Record<string, any>> {
                 method,
                 headers,
             });
-
             if (!response.ok) {
                 throw new Error(`Failed to fetch data from ${url}. (${response.status} ${response.statusText})`);
             }
@@ -88,5 +87,11 @@ export class Fetcher<TEndpointMap extends Record<string, any>> {
         const response = await this.fetch(endpoint, options);
 
         return response.json();
+    }
+
+    public async download(endpoint: string, options?: FetchOptions): Promise<Buffer> {
+        const response = await this.fetch(endpoint as StringKeyOf<TEndpointMap>, options);
+
+        return response.buffer();
     }
 }

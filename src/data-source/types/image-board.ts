@@ -149,6 +149,7 @@ export class ImageBoardDataSource extends BaseDataSource<"ImageBoard", ImageBoar
 
         return {
             id: `${this.name}::${boardCode}::${post.tim}`,
+            uid: post.tim.toString(),
             url: `https://i.4cdn.org/${boardCode}/${post.tim}${post.ext}`,
             size: post.fsize,
             name: post.filename,

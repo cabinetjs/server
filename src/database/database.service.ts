@@ -66,7 +66,7 @@ export class DatabaseService {
     public async write(boards: RawBoard[]) {
         boards = this.mergeBoards(boards);
 
-        await this.logger.doWork({
+        return this.logger.doWork({
             level: "log",
             message: `Writing crawled data into database`,
             work: async () => {
@@ -97,7 +97,7 @@ export class DatabaseService {
                     }
                 }
 
-                await this.attachmentService.save(attachments);
+                const savedAttachments = await this.attachmentService.save(attachments);
                 await this.postService.save(newPosts);
                 await this.threadService.save(newThreads);
 
@@ -138,10 +138,16 @@ export class DatabaseService {
 
                 if (updatedItems.length === 0) {
                     this.logger.log(`There was nothing to write.`);
-                    return;
                 } else {
-                    this.logger.log(`Successfully wrote {cyan}.`, undefined, updatedItems);
+                    this.logger.log(`Successfully wrote {cyan} into database.`, undefined, updatedItems);
                 }
+
+                return {
+                    attachments: savedAttachments,
+                    posts: newPosts,
+                    threads: newThreads,
+                    boards: newBoards,
+                };
             },
         });
     }

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 import { CrawlerService } from "@crawler/crawler.service";
 import { DatabaseService } from "@database/database.service";
@@ -21,7 +22,7 @@ describe("CrawlerService", () => {
                     exports: [DatabaseService, DataSourceService],
                 },
             ],
-            providers: [CrawlerService, configMock],
+            providers: [CrawlerService, configMock, { provide: EventEmitter2, useValue: {} }],
         }).compile();
 
         service = module.get<CrawlerService>(CrawlerService);

@@ -6,7 +6,7 @@ export type Fn<TArgs, TReturn> = TArgs extends never
     ? (...args: TArgs) => TReturn
     : (arg: TArgs) => TReturn;
 
-export type StringKeyOf<T> = Exclude<keyof T, symbol | number>;
+export type StringKeyOf<T> = T extends never ? string : Exclude<keyof T, symbol | number>;
 export type SelectOnly<T, U> = {
     [K in keyof T as T[K] extends U ? K : never]: T[K];
 };

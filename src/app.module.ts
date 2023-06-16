@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 
 import { ConfigModule } from "@config/config.module";
 import { DataSourceModule } from "@data-source/data-source.module";
@@ -9,6 +10,7 @@ import { BoardModule } from "@board/board.module";
 import { ThreadModule } from "@thread/thread.module";
 import { AttachmentModule } from "@attachment/attachment.module";
 import { DatabaseModule } from "@database/database.module";
+import { StorageModule } from "@storage/storage.module";
 
 @Module({
     imports: [
@@ -20,13 +22,23 @@ import { DatabaseModule } from "@database/database.module";
             synchronize: true,
             dropSchema: true,
         }),
+        EventEmitterModule.forRoot({
+            wildcard: false,
+            delimiter: ".",
+            newListener: false,
+            removeListener: false,
+            maxListeners: 10,
+            verboseMemoryLeak: false,
+            ignoreErrors: false,
+        }),
         DataSourceModule,
-        CrawlerModule,
         PostModule,
         BoardModule,
         ThreadModule,
         AttachmentModule,
         DatabaseModule,
+        StorageModule,
+        CrawlerModule,
     ],
 })
 export class AppModule {}

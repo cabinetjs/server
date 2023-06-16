@@ -31,7 +31,8 @@
             "@board/*": ["src/board/*"],
             "@common/*": ["src/common/*"],
             "@attachment/*": ["src/attachment/*"],
-            "@database/*": ["src/database/*"]
+            "@database/*": ["src/database/*"],
+            "@storage/*": ["src/storage/*"]
         },
         "plugins": [
             {

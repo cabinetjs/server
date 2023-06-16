@@ -25,6 +25,9 @@
                                 },
                                 "content": {
                                     "type": "string"
+                                },
+                                "caseSensitive": {
+                                    "type": "boolean"
                                 }
                             }
                         }
@@ -56,10 +59,29 @@
                     "type": "number"
                 }
             ]
+        },
+        "storage": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "local"
+                    ]
+                }
+            },
+            "required": [
+                "path",
+                "type"
+            ]
         }
     },
     "required": [
         "dataSources",
-        "crawlInterval"
+        "crawlInterval",
+        "storage"
     ]
 }

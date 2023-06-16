@@ -1,10 +1,13 @@
 import ms from "ms";
 import { CronJob, Job, SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 
 import { DatabaseService } from "@database/database.service";
 import { DataSourceService } from "@data-source/data-source.service";
+
+import { AttachmentCreatedEvent } from "@attachment/events/attachment-created.event";
 
 import { Config } from "@config/config.module";
 import { InjectConfig } from "@config/config.decorator";
@@ -25,12 +28,13 @@ export class CrawlerService implements OnModuleInit {
         @InjectConfig() private readonly config: Config,
         @Inject(DatabaseService) private readonly databaseService: DatabaseService,
         @Inject(DataSourceService) private readonly dataSourceService: DataSourceService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     public async onModuleInit() {
         const { crawlInterval } = this.config;
 
-        this.task = new Task("Crawler", this.onWork.bind(this), this.onWorkError.bind(this));
+        this.task = new Task("Crawler", this.onWork.bind(this));
 
         if (typeof crawlInterval === "string") {
             if (isCronExpression(crawlInterval)) {
@@ -54,17 +58,33 @@ export class CrawlerService implements OnModuleInit {
     }
 
     private async onWork() {
-        this.logger.log(`Crawling task started`);
+        try {
+            this.logger.log(`Crawling task started`);
 
-        const boards: RawBoard[] = [];
-        for await (const [, data] of this.dataSourceService.crawl()) {
-            boards.push(...data);
+            const boards: RawBoard[] = [];
+            for await (const [, data] of this.dataSourceService.crawl()) {
+                boards.push(...data);
+            }
+
+            const { attachments } = await this.databaseService.write(boards);
+            this.eventEmitter.emit("attachment.created", new AttachmentCreatedEvent(attachments));
+
+            this.logger.log(`Crawling task finished successfully`);
+        } catch (error) {
+            let message: string;
+            let stack: string | undefined;
+            if (error instanceof Error) {
+                message = error.message;
+                stack = error.stack;
+            } else {
+                message = `${error}`;
+            }
+
+            this.logger.error(`Crawling task failed with Error: {red}`, stack, undefined, message);
         }
-
-        await this.databaseService.write(boards);
-        this.logger.log(`Crawling task finished successfully`);
     }
-    private async onWorkError(error: Error) {
-        this.logger.error(`Crawling task failed with Error: {red}`, error.stack, undefined, error.message);
+
+    public async start() {
+        this.onWork();
     }
 }

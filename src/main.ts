@@ -1,6 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 
 import { AppModule } from "@root/app.module";
+import { CrawlerService } from "@crawler/crawler.service";
 
 import { Logger } from "@utils/logger";
 
@@ -10,6 +11,7 @@ async function bootstrap() {
     });
 
     await app.listen(3000);
+    await app.get<CrawlerService>(CrawlerService).start();
 }
 
 bootstrap();

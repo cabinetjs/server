@@ -6,6 +6,7 @@ import betterAjvErrors from "better-ajv-errors";
 import { DynamicModule } from "@nestjs/common";
 
 import { DataSourceOptions } from "@data-source/types";
+import { StorageOptions } from "@storage/types";
 
 import { InvalidConfigError } from "@utils/errors/invalid-config";
 import { composeJsonSchema } from "@utils/json";
@@ -16,11 +17,16 @@ export const CONFIG_DATA = Symbol("CONFIG_DATA");
 export interface Config {
     dataSources: DataSourceOptions[];
     crawlInterval: number | string;
+    storage: StorageOptions;
 }
 
 const DEFAULT_CONFIG: Config = {
     dataSources: [],
     crawlInterval: 1800000,
+    storage: {
+        type: "local",
+        path: "./downloads",
+    },
 };
 
 export class ConfigModule {
@@ -84,7 +90,7 @@ export class ConfigModule {
                     });
 
                     throw new InvalidConfigError(
-                        "Invalid config file found, please check the error message below:",
+                        `Invalid config file found, please check the error message below:\n\n${error}\n`,
                         error,
                     );
                 }
