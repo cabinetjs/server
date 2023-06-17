@@ -112,6 +112,30 @@
                 }
             ]
         },
+        "api": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "graphql"
+                    ]
+                },
+                "port": {
+                    "type": "number"
+                },
+                "endpoint": {
+                    "type": "string"
+                },
+                "playground": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "type",
+                "port"
+            ]
+        },
         "crawlInterval": {
             "oneOf": [
                 {

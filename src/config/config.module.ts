@@ -7,6 +7,7 @@ import { DynamicModule } from "@nestjs/common";
 
 import { DataSourceOptions } from "@data-source/types";
 import { StorageOptions } from "@storage/types";
+import { ApiOptions } from "@config/types/api";
 
 import { InvalidConfigError } from "@utils/errors/invalid-config";
 import { composeJsonSchema } from "@utils/json";
@@ -17,6 +18,7 @@ export const CONFIG_DATA = Symbol("CONFIG_DATA");
 export interface Config {
     dataSources: DataSourceOptions[];
     storage: StorageOptions;
+    api?: ApiOptions;
     crawlInterval: number | string;
     storingConcurrency?: number;
 }

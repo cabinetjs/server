@@ -1,6 +1,8 @@
 import _ from "lodash";
 import { BaseEntity, DeepPartial, FindOptionsWhere, In, Repository } from "typeorm";
 
+import { SelectManyArgs } from "@common/select-many.dto";
+
 export interface Entity extends BaseEntity {
     id: string;
 }
@@ -11,7 +13,7 @@ export abstract class BaseService<TEntity extends Entity, RawType extends DeepPa
         protected readonly repository: Repository<TEntity>,
     ) {}
 
-    public async getIdMap(ids?: string[]): Promise<Record<string, TEntity>> {
+    public async getIdMap(ids?: ReadonlyArray<TEntity["id"]>): Promise<Record<string, TEntity>> {
         const entities = await this.repository.find({
             where: ids
                 ? ({
@@ -21,6 +23,26 @@ export abstract class BaseService<TEntity extends Entity, RawType extends DeepPa
         });
 
         return _.keyBy(entities, "id");
+    }
+
+    public async findByIds(ids: ReadonlyArray<TEntity["id"]>, nullable = false): Promise<TEntity[]> {
+        const entities = await this.getIdMap(ids);
+
+        return ids.map(id => {
+            const entity = entities[id];
+            if (!nullable && !entity) {
+                throw new Error(`${this.entity.name} entity with id '${id}' not found`);
+            }
+
+            return entity || null;
+        });
+    }
+
+    public async selectMany({ skip, take }: SelectManyArgs) {
+        return this.repository.find({
+            skip,
+            take,
+        });
     }
 
     public create(): TEntity;

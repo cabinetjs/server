@@ -2,7 +2,7 @@ import _ from "lodash";
 import { filesize } from "filesize";
 import async, { ErrorCallback } from "async";
 
-import { Inject, Injectable, OnApplicationBootstrap } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, OnApplicationBootstrap } from "@nestjs/common";
 
 import { AttachmentService } from "@attachment/attachment.service";
 import { Attachment } from "@attachment/models/attachment.model";
@@ -17,30 +17,31 @@ import { Logger } from "@utils/logger";
 
 @Injectable()
 export class StorageService implements OnApplicationBootstrap {
+    private static storageObject: BaseStorage<string> | null = null;
+
     private readonly config: Config;
     private readonly logger = new Logger(StorageService.name);
     private readonly queue: async.QueueObject<Attachment>;
-    private storageObject: BaseStorage<string> | null = null;
 
     private get storage() {
-        if (!this.storageObject) {
+        if (!StorageService.storageObject) {
             throw new Error("Storage is not initialized");
         }
 
-        return this.storageObject;
+        return StorageService.storageObject;
     }
 
     public constructor(
         @InjectConfig() config: Config,
-        @Inject(AttachmentService) private readonly attachmentService: AttachmentService,
+        @Inject(forwardRef(() => AttachmentService)) private readonly attachmentService: AttachmentService,
     ) {
         this.config = config;
         this.queue = async.queue(this.drainQueue.bind(this), config.storingConcurrency ?? 1);
     }
 
     public async onApplicationBootstrap() {
-        this.storageObject = createStorage(this.config.storage);
-        await this.storageObject.initialize();
+        StorageService.storageObject = createStorage(this.config.storage);
+        await StorageService.storageObject.initialize();
 
         this.logger.log(`Storage initialized with concurrency {cyan}.`, undefined, this.config.storingConcurrency ?? 1);
     }

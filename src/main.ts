@@ -33,7 +33,10 @@ async function bootstrap() {
         logger: new Logger(),
     });
 
-    await app.listen(3000);
+    if (config.api && "port" in config.api) {
+        await app.listen(config.api.port);
+    }
+
     await app.get<CrawlerService>(CrawlerService).start();
 }
 
