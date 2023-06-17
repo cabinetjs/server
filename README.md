@@ -11,7 +11,7 @@
 
 <div align="center">
     <a href="https://www.npmjs.com/package/@cabinetjs/server">
-        <img alt="npm (tag)" src="https://img.shields.io/npm/v/@cabinetjs/server?style=flat-square">
+        <img alt="npm (tag)" src="https://img.shields.io/npm/v/@cabinetjs/server/dev?style=flat-square">
     </a>
     <a href="https://github.com/cabinetjs/server/blob/main/LICENSE">
         <img src="https://img.shields.io/github/license/cabinetjs/server.svg?style=flat-square" alt="MIT License" />
