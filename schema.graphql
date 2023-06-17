@@ -1,0 +1,37 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Attachment {
+  id: String!
+  uid: String!
+  url: String!
+  size: Int!
+  name: String!
+  extension: String!
+  hash: String!
+}
+
+type Post {
+  id: String!
+  parent: String
+  no: Int!
+  title: String
+  content: String
+  replies: [Post!]!
+  attachments: [Attachment!]!
+}
+
+type Board {
+  id: String!
+  code: String!
+  name: String!
+  description: String!
+  openingPosts: [Post!]!
+  posts: [Post!]!
+}
+
+type Query {
+  posts(skip: Int, take: Int): [Post!]!
+  boards(skip: Int, take: Int): [Board!]!
+}
