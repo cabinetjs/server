@@ -1,0 +1,77 @@
+name: Docker Image Deploy
+
+on:
+    push:
+        tags:
+            - "*"
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2.3.1
+              with:
+                  persist-credentials: false
+
+            - name: Cache node_modules
+              id: node-cache
+              uses: actions/cache@v2
+              env:
+                  cache-name: cache-node-modules
+              with:
+                  # npm cache files are stored in `~/.npm` on Linux/macOS
+                  path: node_modules
+                  key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-node-modules-
+
+            - name: Install and Build
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "18.x"
+
+            - name: Install yarn
+              run: |
+                  npm install -g yarn
+
+            - name: Prepare package
+              run: |
+                  yarn
+
+            - name: Lint
+              run: |
+                  yarn lint
+
+            - name: Test
+              run: |
+                  yarn test
+
+            - name: Build
+              run: |
+                  yarn build
+
+            - name: Login to DockerHub
+              uses: docker/login-action@v1
+              with:
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+            - name: Set Environment Variable for Tagging
+              run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+            - name: Build, tag, and push image to Docker Hub
+              env:
+                DOCKER_BUILDKIT: 1
+                GITHUB_OWNER: ${{ github.repository_owner }}
+                GITHUB_REPO: ${{ github.event.repository.name }}
+              run: |
+                docker build -t $GITHUB_OWNER/$GITHUB_REPO:$RELEASE_VERSION .
+                docker build -t $GITHUB_OWNER/$GITHUB_REPO:latest .
+                docker push $GITHUB_OWNER/$GITHUB_REPO:$RELEASE_VERSION
+                docker push $GITHUB_OWNER/$GITHUB_REPO:latest
+
+            - uses: sarisia/actions-status-discord@v1
+              if: always()
+              with:
+                  webhook: ${{ secrets.DISCORD_WEBHOOK }}
