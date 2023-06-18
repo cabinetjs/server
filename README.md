@@ -24,39 +24,10 @@
 
 ## Introduction
 
-CabinetJS is a cli application for archiving web contents from various sources.
-
-## Installation
-
-```bash
-npm install -g @cabinetjs/server
-```
+CabinetJS is a CLI tool that helps you crawl and archive content across different types of web services. with the 
+configuration file, you can define the crawling rules about which web services to archive, crawling interval, and 
+filtering for selecting the content to archive.
 
 ## Usage
 
-```bash
-$ cabinet -h
-
-Usage: cabinet [options]
-
-Options:
-  -c, --config <path>  Path to config file (default: "./cabinet.config.json")
-  -h, --help           display help for command
-```
-
-## Configuration
-
-We use a JSON file to configure CabinetJS. The default path is `./cabinet.config.json`. you can change it with `-c` or `--config` CLI option.
-
-```json5
-{
-    "dataSources": [
-        // data sources ...
-    ],
-    "crawlInterval": 160000,
-    "storage": {
-        // storage options ...
-    }
-}
-
-```
+See [CabinetJS Documentation](https://cabinet.sophia-dev.io/) for more information.
