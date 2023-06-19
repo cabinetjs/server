@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Board {
+  id: String!
+  code: String!
+  name: String!
+  description: String!
+  openingPosts: [Post!]!
+  posts: [Post!]!
+}
+
 type Attachment {
   id: String!
   uid: String!
@@ -22,16 +31,15 @@ type Post {
   attachments: [Attachment!]!
 }
 
-type Board {
+type DataSource {
   id: String!
-  code: String!
-  name: String!
-  description: String!
-  openingPosts: [Post!]!
-  posts: [Post!]!
+  type: String!
+  postCount: Int!
+  mediaCount: Int!
 }
 
 type Query {
+  dataSources: [DataSource!]!
   posts(skip: Int, take: Int): [Post!]!
   boards(skip: Int, take: Int): [Board!]!
 }

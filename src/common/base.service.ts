@@ -45,6 +45,10 @@ export abstract class BaseService<TEntity extends Entity, RawType extends DeepPa
         });
     }
 
+    public async count(where: FindOptionsWhere<TEntity>) {
+        return this.repository.count({ where });
+    }
+
     public create(): TEntity;
     public create(rawData: DeepPartial<TEntity>): TEntity;
     public create(rawData: DeepPartial<TEntity>[]): TEntity[];

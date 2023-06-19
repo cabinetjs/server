@@ -1,6 +1,7 @@
 import path from "path";
+import fs from "fs-extra";
 
-import { DynamicModule, Module } from "@nestjs/common";
+import { DynamicModule, Module, OnModuleInit } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { GraphQLModule } from "@nestjs/graphql";
@@ -10,18 +11,22 @@ import { Config, ConfigModule } from "@config/config.module";
 import { DataSourceModule } from "@data-source/data-source.module";
 import { CrawlerModule } from "@crawler/crawler.module";
 import { BoardModule } from "@board/board.module";
-import { AttachmentModule } from "@attachment/attachment.module";
 import { DatabaseModule } from "@database/database.module";
 import { StorageModule } from "@storage/storage.module";
 
 import { PostModule } from "@post/post.module";
 import { PostService } from "@post/post.service";
 
-import { createGraphQLContext } from "@utils/graphql";
+import { AttachmentModule } from "@attachment/attachment.module";
 import { AttachmentService } from "@attachment/attachment.service";
 
+import { createGraphQLContext } from "@utils/graphql";
+
+const GRAPHQL_SCHEMA_PATH = path.join(process.cwd(), "./schema.graphql");
+const CLIENT_ROOT = path.join(process.cwd(), "../client");
+
 @Module({})
-export class AppModule {
+export class AppModule implements OnModuleInit {
     public static forRoot(config: Config, dropDatabase: boolean): DynamicModule {
         const imports: DynamicModule[] = [];
         if (config.api?.type === "graphql") {
@@ -34,12 +39,7 @@ export class AppModule {
                     useFactory: (postService: PostService, attachmentService: AttachmentService) => ({
                         path: endpoint,
                         playground,
-
-                        autoSchemaFile:
-                            process.env.NODE_ENV === "development"
-                                ? path.join(process.cwd(), "./schema.graphql")
-                                : true,
-
+                        autoSchemaFile: process.env.NODE_ENV === "development" ? GRAPHQL_SCHEMA_PATH : true,
                         context: () => createGraphQLContext(postService, attachmentService),
                     }),
                     imports: [PostModule, AttachmentModule],
@@ -79,5 +79,11 @@ export class AppModule {
                 CrawlerModule,
             ],
         };
+    }
+
+    public async onModuleInit() {
+        if (process.env.NODE_ENV === "development") {
+            await fs.copy(GRAPHQL_SCHEMA_PATH, path.join(CLIENT_ROOT, "./schema.gql"));
+        }
     }
 }

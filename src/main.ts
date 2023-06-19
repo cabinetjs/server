@@ -31,6 +31,9 @@ async function bootstrap() {
     const config = await ConfigModule.loadConfig(configPath);
     const app = await NestFactory.create(AppModule.forRoot(config, options.dropDatabase), {
         logger: new Logger(),
+        cors: {
+            origin: "*",
+        },
     });
 
     if (config.api && "port" in config.api) {
