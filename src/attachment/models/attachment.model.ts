@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, Column, ManyToOne, PrimaryColumn } from "typeorm";
+import { Entity, BaseEntity, Column, ManyToOne, PrimaryColumn, CreateDateColumn } from "typeorm";
 
 import { Field, Int, ObjectType } from "@nestjs/graphql";
 
@@ -42,6 +42,12 @@ export class Attachment extends BaseEntity {
 
     @Column({ type: "text", nullable: true })
     public storageData?: Nullable<string>;
+
+    @Column({ type: "datetime", nullable: true })
+    public storedAt?: Nullable<Date>;
+
+    @CreateDateColumn()
+    public createdAt!: Date;
 
     // Attachment[] => Post
     @ManyToOne(() => Post, item => item.attachments)

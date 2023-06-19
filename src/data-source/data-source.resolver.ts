@@ -4,6 +4,7 @@ import { Query, ResolveField, Resolver, Root, Int } from "@nestjs/graphql";
 import { DataSourceService } from "@data-source/data-source.service";
 
 import { DataSourceModel } from "@data-source/models/data-source.model";
+import { Attachment } from "@attachment/models/attachment.model";
 
 @Resolver(() => DataSourceModel)
 export class DataSourceResolver {
@@ -22,5 +23,10 @@ export class DataSourceResolver {
     @ResolveField(() => Int)
     public async mediaCount(@Root() dataSource: DataSourceModel) {
         return this.dataSourceService.getMediaCount(dataSource.id);
+    }
+
+    @ResolveField(() => Attachment, { nullable: true })
+    public async latestAttachment(@Root() dataSource: DataSourceModel) {
+        return this.dataSourceService.getLatestMedia(dataSource.id);
     }
 }

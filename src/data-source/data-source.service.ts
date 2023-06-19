@@ -1,3 +1,4 @@
+import { IsNull, Like, Not } from "typeorm";
 import { Inject, Injectable, OnApplicationBootstrap } from "@nestjs/common";
 
 import { Config } from "@config/config.module";
@@ -11,7 +12,6 @@ import { AttachmentService } from "@attachment/attachment.service";
 
 import { BaseDataSource } from "@data-source/types/base";
 import { createDataSource } from "@data-source/types";
-import { Like } from "typeorm";
 
 @Injectable()
 export class DataSourceService implements OnApplicationBootstrap {
@@ -57,5 +57,19 @@ export class DataSourceService implements OnApplicationBootstrap {
     }
     public getMediaCount(name: string) {
         return this.attachmentService.count({ id: Like(`${name}%`) });
+    }
+
+    public getLatestMedia(name: string) {
+        return this.attachmentService.findOne({
+            where: {
+                id: Like(`${name}%`),
+                isStored: true,
+                storedAt: Not(IsNull()),
+            },
+            order: {
+                createdAt: "DESC",
+                storedAt: "DESC",
+            },
+        });
     }
 }

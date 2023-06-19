@@ -42,6 +42,7 @@ export abstract class BaseStorage<
         const data = await this.doStore(attachment);
         attachment.isStored = true;
         attachment.storageData = JSON.stringify(data);
+        attachment.storedAt = new Date();
 
         return attachment;
     }

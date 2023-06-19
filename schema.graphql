@@ -36,6 +36,7 @@ type DataSource {
   type: String!
   postCount: Int!
   mediaCount: Int!
+  latestAttachment: Attachment
 }
 
 type Query {

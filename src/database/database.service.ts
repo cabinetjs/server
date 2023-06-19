@@ -45,6 +45,7 @@ export class DatabaseService {
 
             attachment.storageData = oldAttachment.storageData;
             attachment.isStored = oldAttachment.isStored;
+            attachment.storedAt = oldAttachment.storedAt;
         }
 
         return {
