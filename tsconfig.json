@@ -32,7 +32,8 @@
             "@common/*": ["src/common/*"],
             "@attachment/*": ["src/attachment/*"],
             "@database/*": ["src/database/*"],
-            "@storage/*": ["src/storage/*"]
+            "@storage/*": ["src/storage/*"],
+            "@thumbnail/*": ["src/thumbnail/*"]
         },
         "plugins": [
             {

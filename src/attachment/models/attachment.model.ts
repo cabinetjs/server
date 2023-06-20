@@ -1,8 +1,9 @@
-import { Entity, BaseEntity, Column, ManyToOne, PrimaryColumn, CreateDateColumn } from "typeorm";
+import { Entity, BaseEntity, Column, ManyToOne, PrimaryColumn, CreateDateColumn, OneToMany, RelationId } from "typeorm";
 
 import { Field, Int, ObjectType } from "@nestjs/graphql";
 
 import { Post } from "@post/models/post.model";
+import { Thumbnail } from "@thumbnail/models/thumbnail.model";
 
 import { AsRawType, Nullable } from "@utils/types";
 
@@ -20,6 +21,10 @@ export class Attachment extends BaseEntity {
     @Field(() => String)
     @Column({ type: "text" })
     public url!: string;
+
+    @Field(() => String, { nullable: true })
+    @Column({ type: "text", nullable: true })
+    public thumbnailUrl?: Nullable<string>;
 
     @Field(() => Int)
     @Column({ type: "int" })
@@ -52,6 +57,13 @@ export class Attachment extends BaseEntity {
     // Attachment[] => Post
     @ManyToOne(() => Post, item => item.attachments)
     public post!: Post;
+
+    // Attachment => Thumbnail[]
+    @OneToMany(() => Thumbnail, item => item.attachment)
+    public thumbnails!: Thumbnail[];
+
+    @RelationId((item: Attachment) => item.thumbnails)
+    public thumbnailIds!: Thumbnail["id"][];
 }
 
 export type RawAttachment = Omit<AsRawType<Attachment>, "isStored">;

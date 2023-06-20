@@ -70,6 +70,9 @@ export class StorageService implements OnApplicationBootstrap {
             `(${filesize(totalSize)})`,
         );
     }
+    public async pull(attachment: Attachment) {
+        return this.storage.pull(attachment);
+    }
 
     private drainQueue(attachment: Attachment, callback: ErrorCallback) {
         if (attachment.isStored) {

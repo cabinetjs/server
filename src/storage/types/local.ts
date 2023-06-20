@@ -38,7 +38,6 @@ export class LocalStorage extends BaseStorage<"local", LocalStorageOptions, Loca
         await fs.ensureDir(targetPath);
         this.path = targetPath;
     }
-
     public async doStore(attachment: Attachment): Promise<LocalStorageData> {
         const buffer = await this.fetcher.download(attachment.url);
         const fileName = `${attachment.uid}${attachment.extension}`;
@@ -50,7 +49,6 @@ export class LocalStorage extends BaseStorage<"local", LocalStorageOptions, Loca
             path: targetPath,
         };
     }
-
     public async doCheckStored(attachment: Attachment): Promise<boolean> {
         if (!attachment.storageData) {
             return true;
@@ -68,5 +66,22 @@ export class LocalStorage extends BaseStorage<"local", LocalStorageOptions, Loca
         }
 
         return fs.existsSync(targetPath);
+    }
+
+    public async pull(attachment: Attachment): Promise<Buffer> {
+        if (!attachment.storageData) {
+            throw new Error("Attachment is not stored");
+        }
+
+        const data = JSON.parse(attachment.storageData);
+        if (!is<LocalStorageData>(data)) {
+            throw new Error("Stored data is invalid");
+        }
+
+        if (!fs.existsSync(data.path)) {
+            throw new Error("File does not exist");
+        }
+
+        return fs.readFile(data.path);
     }
 }

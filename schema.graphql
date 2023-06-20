@@ -15,6 +15,7 @@ type Attachment {
   id: String!
   uid: String!
   url: String!
+  thumbnailUrl: String
   size: Int!
   name: String!
   extension: String!

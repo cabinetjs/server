@@ -1,6 +1,13 @@
 import { is } from "typia";
 
-import { CreateBucketCommand, HeadBucketCommand, HeadObjectCommand, PutObjectCommand, S3 } from "@aws-sdk/client-s3";
+import {
+    CreateBucketCommand,
+    GetObjectCommand,
+    HeadBucketCommand,
+    HeadObjectCommand,
+    PutObjectCommand,
+    S3,
+} from "@aws-sdk/client-s3";
 
 import { Attachment } from "@attachment/models/attachment.model";
 
@@ -85,5 +92,28 @@ export class S3Storage extends BaseStorage<"s3", S3StorageOptions, S3StorageData
         }
 
         return true;
+    }
+
+    public async pull(attachment: Attachment): Promise<Buffer> {
+        if (!attachment.storageData) {
+            throw new Error("Attachment is not stored");
+        }
+
+        if (!is<S3StorageData>(attachment.storageData)) {
+            throw new Error("Stored data is invalid");
+        }
+
+        const { Body } = await this.s3.send(
+            new GetObjectCommand({
+                Bucket: attachment.storageData.bucketName,
+                Key: attachment.storageData.key,
+            }),
+        );
+
+        if (!Body) {
+            throw new Error("Attachment is not stored");
+        }
+
+        return Buffer.from(await Body.transformToByteArray());
     }
 }

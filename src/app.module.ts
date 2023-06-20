@@ -6,6 +6,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver } from "@nestjs/apollo";
+import { ServeStaticModule } from "@nestjs/serve-static";
 
 import { Config, ConfigModule } from "@config/config.module";
 import { DataSourceModule } from "@data-source/data-source.module";
@@ -13,6 +14,7 @@ import { CrawlerModule } from "@crawler/crawler.module";
 import { BoardModule } from "@board/board.module";
 import { DatabaseModule } from "@database/database.module";
 import { StorageModule } from "@storage/storage.module";
+import { ThumbnailModule } from "@thumbnail/thumbnail.module";
 
 import { PostModule } from "@post/post.module";
 import { PostService } from "@post/post.service";
@@ -51,6 +53,10 @@ export class AppModule implements OnModuleInit {
             module: AppModule,
             imports: [
                 ...imports,
+                ServeStaticModule.forRoot({
+                    rootPath: path.join(process.cwd(), "thumbnails"),
+                    serveRoot: "/thumbnails",
+                }),
                 ConfigModule.forRoot(config),
                 TypeOrmModule.forRoot({
                     type: "sqlite",
@@ -77,6 +83,7 @@ export class AppModule implements OnModuleInit {
                 DatabaseModule,
                 StorageModule,
                 CrawlerModule,
+                ThumbnailModule,
             ],
         };
     }

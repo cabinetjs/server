@@ -47,6 +47,8 @@ export abstract class BaseStorage<
         return attachment;
     }
 
+    public abstract pull(attachment: Attachment): Promise<Buffer>;
+
     public async checkStored(attachment: Attachment): Promise<boolean> {
         if (!attachment.isStored) {
             return false;

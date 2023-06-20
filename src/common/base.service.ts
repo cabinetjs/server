@@ -7,7 +7,7 @@ export interface Entity extends BaseEntity {
     id: string;
 }
 
-export abstract class BaseService<TEntity extends Entity, RawType extends DeepPartial<TEntity>> {
+export abstract class BaseService<TEntity extends Entity, RawType extends DeepPartial<TEntity> = any> {
     protected constructor(
         protected readonly entity: typeof BaseEntity,
         protected readonly repository: Repository<TEntity>,
