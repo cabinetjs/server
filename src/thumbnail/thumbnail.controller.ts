@@ -34,7 +34,28 @@ export class ThumbnailController {
             throw new Error("Attachment not found");
         }
 
-        const thumbnail = await this.thumbnailService.ensure(attachment, widthValue, heightValue);
+        const thumbnail = await this.thumbnailService.ensure(attachment, { width: widthValue, height: heightValue });
+        const fileName = path.basename(thumbnail.path);
+
+        response.redirect(`/thumbnails/${fileName}`);
+    }
+
+    @Get("/:uid/:size")
+    public async singularThumbnail(@Param("uid") uid: string, @Param("size") size: number, @Res() response: Response) {
+        const sizeValue = Number(size);
+        if (isNaN(sizeValue)) {
+            throw new Error("Invalid size");
+        }
+
+        const attachment = await this.attachmentService.findOne({
+            where: { uid },
+        });
+
+        if (!attachment) {
+            throw new Error("Attachment not found");
+        }
+
+        const thumbnail = await this.thumbnailService.ensure(attachment, { size: sizeValue });
         const fileName = path.basename(thumbnail.path);
 
         response.redirect(`/thumbnails/${fileName}`);

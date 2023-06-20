@@ -15,6 +15,9 @@ export class Thumbnail extends BaseEntity {
     @Column({ type: "int" })
     public size!: number;
 
+    @Column({ type: "int" })
+    public filesize!: number;
+
     @Column({ type: "varchar", length: 255 })
     public path!: string;
 
