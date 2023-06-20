@@ -38,6 +38,9 @@ type DataSource {
   postCount: Int!
   mediaCount: Int!
   latestAttachment: Attachment
+  boards: [Board!]!
+  openingPosts: [Post!]!
+  attachments: [Attachment!]!
 }
 
 type Query {
