@@ -137,8 +137,8 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
             uri,
             parent: parent?.uri,
             no: rawPost.no,
-            title: rawPost.sub,
-            content: rawPost.com,
+            title: rawPost.sub ? decode(rawPost.sub) : null,
+            content: rawPost.com ? decode(rawPost.com) : null,
             attachments: _.compact([this.getAttachment(boardCode, rawPost, uri)]),
         };
     }
