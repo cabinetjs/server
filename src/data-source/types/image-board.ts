@@ -97,7 +97,7 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
             let board = results.find(board => board.code === boardCode);
             if (!board) {
                 board = {
-                    id: `${this.name}::${boardCode}`,
+                    uri: `${this.name}::${boardCode}`,
                     code: targetBoard.board,
                     name: targetBoard.title,
                     description: targetBoard.meta_description,
@@ -131,8 +131,8 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
         parent?: RawPost,
     ): RawBoard["posts"][0] {
         return {
-            id: `${board.id}::${rawPost.no}`,
-            parent: parent?.id,
+            uri: `${board.uri}::${rawPost.no}`,
+            parent: parent?.uri,
             no: rawPost.no,
             title: rawPost.sub,
             content: rawPost.com,
@@ -146,7 +146,7 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
         }
 
         return {
-            id: `${this.name}::${boardCode}::${post.tim}`,
+            uri: `${this.name}::${boardCode}::${post.tim}`,
             uid: post.tim.toString(),
             url: `https://i.4cdn.org/${boardCode}/${post.tim}${post.ext}`,
             size: post.fsize,

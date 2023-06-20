@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 import { Field, Int, ObjectType } from "@nestjs/graphql";
 
@@ -11,8 +11,12 @@ import { AsRawType, Nullable } from "@utils/types";
 @Entity({ name: "posts" })
 export class Post extends BaseEntity {
     @Field(() => String)
-    @PrimaryColumn({ type: "varchar", length: 255 })
+    @PrimaryGeneratedColumn("uuid")
     public id!: string;
+
+    @Field(() => String)
+    @Column({ type: "varchar", length: 255, unique: true })
+    public uri!: string;
 
     @Field(() => String, { nullable: true })
     @Column({ type: "int", nullable: true })
@@ -39,6 +43,6 @@ export class Post extends BaseEntity {
     public attachments!: Attachment[];
 }
 
-export type RawPost = AsRawType<Post> & {
+export type RawPost = Omit<AsRawType<Post>, "id"> & {
     attachments: RawAttachment[];
 };

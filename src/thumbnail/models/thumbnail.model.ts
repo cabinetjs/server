@@ -26,5 +26,5 @@ export class Thumbnail extends BaseEntity {
     public attachment!: Attachment;
 
     @RelationId((item: Thumbnail) => item.attachment)
-    public attachmentId!: Attachment["id"];
+    public attachmentId!: Attachment["uri"];
 }

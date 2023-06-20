@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryColumn, RelationId } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn, RelationId } from "typeorm";
 
 import { Field, ObjectType } from "@nestjs/graphql";
 
@@ -10,8 +10,12 @@ import { AsRawType } from "@utils/types";
 @Entity({ name: "boards" })
 export class Board extends BaseEntity {
     @Field(() => String)
-    @PrimaryColumn({ type: "varchar", length: 255 })
+    @PrimaryGeneratedColumn("uuid")
     public id!: string;
+
+    @Field(() => String)
+    @Column({ type: "varchar", length: 255, unique: true })
+    public uri!: string;
 
     @Field(() => String)
     @Column({ type: "varchar", length: 255 })
@@ -30,9 +34,9 @@ export class Board extends BaseEntity {
     public posts!: Post[];
 
     @RelationId((item: Board) => item.posts)
-    public postIds!: Post["id"][];
+    public postIds!: Post["uri"][];
 }
 
-export type RawBoard = AsRawType<Board> & {
+export type RawBoard = Omit<AsRawType<Board>, "id"> & {
     posts: RawPost[];
 };

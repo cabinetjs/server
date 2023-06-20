@@ -41,7 +41,7 @@ export class ThumbnailService extends BaseService<Thumbnail> {
         const item = await this.thumbnailRepository
             .createQueryBuilder("t")
             .select("t.id", "id")
-            .where("t.attachmentId = :attachmentId", { attachmentId: attachment.id })
+            .where("t.attachmentId = :attachmentId", { attachmentId: attachment.uri })
             .andWhere("t.width = :width", { width })
             .andWhere("t.height = :height", { height })
             .getRawOne<{ id: string }>();

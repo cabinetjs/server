@@ -53,16 +53,16 @@ export class DataSourceService implements OnApplicationBootstrap {
     }
 
     public getPostCount(name: string) {
-        return this.postService.count({ id: Like(`${name}%`) });
+        return this.postService.count({ uri: Like(`${name}%`) });
     }
     public getMediaCount(name: string) {
-        return this.attachmentService.count({ id: Like(`${name}%`) });
+        return this.attachmentService.count({ uri: Like(`${name}%`) });
     }
 
     public getLatestMedia(name: string) {
         return this.attachmentService.findOne({
             where: {
-                id: Like(`${name}%`),
+                uri: Like(`${name}%`),
                 isStored: true,
                 storedAt: Not(IsNull()),
             },

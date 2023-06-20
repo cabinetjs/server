@@ -46,7 +46,7 @@ export class DataSourceResolver {
     public async boards(@Root() dataSource: DataSourceModel) {
         return this.boardService.find({
             where: {
-                id: Like(`${dataSource.id}::%`),
+                uri: Like(`${dataSource.id}::%`),
             },
         });
     }
@@ -55,7 +55,7 @@ export class DataSourceResolver {
     public async openingPosts(@Root() dataSource: DataSourceModel) {
         return this.postService.find({
             where: {
-                id: Like(`${dataSource.id}::%`),
+                uri: Like(`${dataSource.id}::%`),
                 parent: IsNull(),
             },
         });
@@ -65,7 +65,7 @@ export class DataSourceResolver {
     public async attachments(@Root() dataSource: DataSourceModel) {
         return this.attachmentService.find({
             where: {
-                id: Like(`${dataSource.id}::%`),
+                uri: Like(`${dataSource.id}::%`),
             },
         });
     }

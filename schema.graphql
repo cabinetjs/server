@@ -4,6 +4,7 @@
 
 type Board {
   id: String!
+  uri: String!
   code: String!
   name: String!
   description: String!
@@ -13,6 +14,7 @@ type Board {
 
 type Attachment {
   id: String!
+  uri: String!
   uid: String!
   url: String!
   thumbnailUrl: String
@@ -24,6 +26,7 @@ type Attachment {
 
 type Post {
   id: String!
+  uri: String!
   parent: String
   no: Int!
   title: String

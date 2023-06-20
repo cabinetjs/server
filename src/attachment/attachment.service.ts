@@ -21,14 +21,14 @@ export class AttachmentService extends BaseService<Attachment, RawAttachment> {
         super(Attachment, attachmentRepository);
     }
 
-    public async getBulkIdsOf(postIds: ReadonlyArray<Post["id"]>): Promise<Record<Post["id"], Attachment["id"][]>> {
-        const idMap: Record<Post["id"], Attachment["id"][]> = {};
+    public async getBulkIdsOf(postIds: ReadonlyArray<Post["uri"]>): Promise<Record<Post["uri"], Attachment["uri"][]>> {
+        const idMap: Record<Post["uri"], Attachment["uri"][]> = {};
         const result = await this.repository
             .createQueryBuilder("a")
             .select("`a`.`id`", "id")
             .addSelect("`a`.`postId`", "postId")
             .where("`a`.`postId` IN (:...ids)", { ids: postIds })
-            .getRawMany<{ id: Attachment["id"]; postId: Post["id"] }>();
+            .getRawMany<{ id: Attachment["uri"]; postId: Post["uri"] }>();
 
         for (const { id, postId } of result) {
             if (!idMap[postId]) {

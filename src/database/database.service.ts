@@ -1,16 +1,18 @@
+import _ from "lodash";
+import { Like } from "typeorm";
+
 import { Inject, Injectable } from "@nestjs/common";
 
 import { AttachmentService } from "@attachment/attachment.service";
+import { Attachment, RawAttachment } from "@attachment/models/attachment.model";
 
 import { PostService } from "@post/post.service";
-import { RawPost } from "@post/models/post.model";
+import { Post, RawPost } from "@post/models/post.model";
 
 import { BoardService } from "@board/board.service";
-import { RawBoard } from "@board/models/board.model";
+import { Board, RawBoard } from "@board/models/board.model";
 
 import { Logger } from "@utils/logger";
-import _ from "lodash";
-import { RawAttachment } from "@attachment/models/attachment.model";
 
 @Injectable()
 export class DatabaseService {
@@ -31,53 +33,152 @@ export class DatabaseService {
     }
 
     private async doWrite(boards: RawBoard[]) {
-        boards = this.mergeBoards(boards);
+        const newAttachments = _.chain(boards).map("posts").flatten().map("attachments").flatten().value();
+        const oldAttachments = await this.attachmentService.find({
+            where: boards.map(board => ({ uri: Like(`${board.uri}::%`) })),
+        });
 
-        const posts = boards.flatMap(board => board.posts);
-        const attachments: Array<RawAttachment & { isStored?: boolean }> = posts.flatMap(post => post.attachments);
-        const oldAttachments = await this.attachmentService.getIdMap(attachments.map(attachment => attachment.id));
+        const { addedAttachments, updatedAttachments } = this.mergeAttachments(oldAttachments, newAttachments);
+        let allAttachments = [...addedAttachments, ...updatedAttachments];
+        allAttachments = await this.attachmentService.save(allAttachments);
 
-        for (const attachment of attachments) {
-            const oldAttachment = oldAttachments[attachment.id];
-            if (!oldAttachment) {
-                continue;
+        const attachmentMap = _.keyBy(allAttachments, "uri");
+        const allPosts: Post[] = [];
+        const allBoards: Board[] = [];
+        for (const board of boards) {
+            let targetBoard = await this.boardService.findOne({ where: { uri: board.uri } });
+            if (!targetBoard) {
+                targetBoard = this.boardService.create(board);
+                targetBoard.posts = [];
+
+                targetBoard = await this.boardService.save(targetBoard);
             }
 
-            attachment.storageData = oldAttachment.storageData;
-            attachment.isStored = oldAttachment.isStored;
-            attachment.storedAt = oldAttachment.storedAt;
+            allBoards.push(targetBoard);
+
+            const oldPosts = await this.postService.find({
+                where: { uri: Like(`${board.uri}::%`) },
+            });
+
+            const { updatedPosts, addedPosts } = this.mergePosts(oldPosts, board.posts, attachmentMap);
+            const targetPosts = [...addedPosts, ...updatedPosts];
+            for (const post of targetPosts) {
+                post.board = targetBoard;
+            }
+
+            const savedPosts = await this.postService.save(targetPosts);
+            allPosts.push(...savedPosts);
         }
 
         return {
-            attachments: await this.attachmentService.save(attachments),
-            posts: await this.postService.save(posts),
-            boards: await this.boardService.save(boards),
+            attachments: allAttachments,
+            posts: allPosts,
+            boards: allBoards,
         };
     }
 
-    private mergeBoards(boards: RawBoard[]) {
-        const result: RawBoard[] = [];
-        for (const board of boards) {
-            const existingBoard = result.find(b => b.id === board.id);
-            if (existingBoard) {
-                existingBoard.posts.push(...board.posts);
-            } else {
-                result.push(board);
+    private mergeAttachments(oldAttachments: Attachment[], newAttachments: RawAttachment[]) {
+        const newAttachmentMap = _.keyBy(newAttachments, "uri");
+        const oldAttachmentMap = _.keyBy(oldAttachments, "uri");
+
+        const targets = [...oldAttachments, ..._.differenceBy(newAttachments, oldAttachments, "uri")];
+        const updatedAttachments: Attachment[] = [];
+        const addedAttachments: Attachment[] = [];
+        for (const target of targets) {
+            const oldAttachment = oldAttachmentMap[target.uri];
+            const newAttachment = newAttachmentMap[target.uri];
+            if (!oldAttachment && !newAttachment) {
+                continue;
             }
+
+            if (!oldAttachment) {
+                addedAttachments.push(this.attachmentService.create(newAttachment));
+                continue;
+            }
+
+            if (!newAttachment) {
+                continue;
+            }
+
+            const attachment = this.mergeAttachment(oldAttachment, newAttachment);
+            updatedAttachments.push(attachment);
         }
 
-        for (const board of result) {
-            const postGroups = _.chain(board.posts).groupBy("id").value();
-            const postIds = Object.keys(postGroups);
-
-            board.posts = postIds.map<RawPost>(postId => ({
-                ..._.merge({}, ...postGroups[postId]),
-                attachments: _.chain(postGroups[postId])
-                    .flatMap(post => post.attachments)
-                    .uniqBy("id")
-                    .value(),
-            }));
+        return {
+            updatedAttachments,
+            addedAttachments,
+        };
+    }
+    private mergeAttachment(oldAttachment: Attachment, newAttachment: RawAttachment) {
+        if (oldAttachment.uri !== newAttachment.uri) {
+            throw new Error(`Attachment uri mismatch: ${oldAttachment.uri} !== ${newAttachment.uri}`);
         }
+
+        const result = this.attachmentService.create(oldAttachment);
+        result.uid = newAttachment.uid;
+        result.url = newAttachment.url;
+        result.thumbnailUrl = newAttachment.thumbnailUrl;
+        result.size = newAttachment.size;
+        result.name = newAttachment.name;
+        result.extension = newAttachment.extension;
+        result.hash = newAttachment.hash;
+
+        return result;
+    }
+
+    private mergePosts(oldPosts: Post[], newPosts: RawPost[], attachmentMap: _.Dictionary<Attachment>) {
+        const newPostMap = _.keyBy(newPosts, "uri");
+        const oldPostMap = _.keyBy(oldPosts, "uri");
+
+        const targets = [...oldPosts, ..._.differenceBy(newPosts, oldPosts, "uri")];
+        const updatedPosts: Post[] = [];
+        const addedPosts: Post[] = [];
+        for (const target of targets) {
+            const oldPost = oldPostMap[target.uri];
+            const newPost = newPostMap[target.uri];
+            if (!oldPost && !newPost) {
+                continue;
+            }
+
+            if (!oldPost) {
+                const post = this.postService.create(newPost);
+                post.attachments = _.chain(newPost.attachments)
+                    .map("uri")
+                    .map(uri => attachmentMap[uri])
+                    .value();
+
+                addedPosts.push(post);
+                continue;
+            }
+
+            if (!newPost) {
+                continue;
+            }
+
+            const post = this.mergePost(oldPost, newPost, attachmentMap);
+            updatedPosts.push(post);
+        }
+
+        return {
+            updatedPosts,
+            addedPosts,
+        };
+    }
+    private mergePost(oldPost: Post, newPost: RawPost, attachmentMap: _.Dictionary<Attachment>) {
+        if (oldPost.uri !== newPost.uri) {
+            throw new Error(`Post uri mismatch: ${oldPost.uri} !== ${newPost.uri}`);
+        }
+
+        const result = this.postService.create(oldPost);
+        result.title = newPost.title;
+        result.content = newPost.content;
+        result.no = newPost.no;
+        result.parent = newPost.parent;
+        result.attachments = _.chain(attachmentMap)
+            .entries()
+            .filter(([uri]) => uri.startsWith(newPost.uri))
+            .map(([, attachment]) => attachment)
+            .value();
 
         return result;
     }

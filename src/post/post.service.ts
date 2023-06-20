@@ -13,7 +13,7 @@ export class PostService extends BaseService<Post, RawPost> {
         super(Post, postRepository);
     }
 
-    public async findOpeningByIds(ids: ReadonlyArray<Post["id"]>): Promise<Array<Post | null>> {
+    public async findOpeningByIds(ids: ReadonlyArray<Post["uri"]>): Promise<Array<Post | null>> {
         const posts = await this.findByIds(ids);
 
         return posts.map(post => (post.parent ? null : post));
@@ -23,8 +23,8 @@ export class PostService extends BaseService<Post, RawPost> {
         return this.repository
             .createQueryBuilder("p")
             .select("`p`.`id`", "id")
-            .where("`p`.`parent` = :id", { id: post.id })
-            .getRawMany<{ id: Post["id"] }>()
+            .where("`p`.`parent` = :id", { id: post.uri })
+            .getRawMany<{ id: Post["uri"] }>()
             .then(raw => raw.map(({ id }) => id));
     }
 }
