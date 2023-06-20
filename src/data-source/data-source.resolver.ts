@@ -1,7 +1,7 @@
 import { IsNull, Like } from "typeorm";
 
 import { Inject } from "@nestjs/common";
-import { Int, Query, ResolveField, Resolver, Root } from "@nestjs/graphql";
+import { Args, Int, Query, ResolveField, Resolver, Root } from "@nestjs/graphql";
 
 import { DataSourceService } from "@data-source/data-source.service";
 import { BoardService } from "@board/board.service";
@@ -21,6 +21,13 @@ export class DataSourceResolver {
         @Inject(PostService) private readonly postService: PostService,
         @Inject(AttachmentService) private readonly attachmentService: AttachmentService,
     ) {}
+
+    @Query(() => DataSourceModel, { nullable: true })
+    public async dataSource(@Args("name", { type: () => String }) name: string): Promise<DataSourceModel | null> {
+        const dataSources = this.dataSourceService.getRegisteredDataSources();
+
+        return dataSources.find(dataSource => dataSource.id === name) ?? null;
+    }
 
     @Query(() => [DataSourceModel])
     public async dataSources(): Promise<DataSourceModel[]> {

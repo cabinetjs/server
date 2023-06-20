@@ -1,11 +1,12 @@
 import _ from "lodash";
 
 import { Inject } from "@nestjs/common";
-import { Context, ResolveField, Resolver, Root } from "@nestjs/graphql";
+import { Context, Int, ResolveField, Resolver, Root } from "@nestjs/graphql";
 
 import { BoardService } from "@board/board.service";
-import { Board } from "@board/models/board.model";
 
+import { Board } from "@board/models/board.model";
+import { Attachment } from "@attachment/models/attachment.model";
 import { Post } from "@post/models/post.model";
 
 import { createBaseResolver } from "@common/base.resolver";
@@ -26,5 +27,20 @@ export class BoardResolver extends createBaseResolver(Board) {
     @ResolveField(() => [Post])
     public async posts(@Root() board: Board, @Context("loaders") loaders: GraphQLContext["loaders"]) {
         return loaders.post.loadMany(board.postIds);
+    }
+
+    @ResolveField(() => Int)
+    public async postCount(@Root() board: Board) {
+        return this.boardService.getPostCount(board.uri);
+    }
+
+    @ResolveField(() => Int)
+    public async mediaCount(@Root() board: Board) {
+        return this.boardService.getMediaCount(board.uri);
+    }
+
+    @ResolveField(() => Attachment, { nullable: true })
+    public async latestAttachment(@Root() board: Board) {
+        return this.boardService.getLatestMedia(board.uri);
     }
 }

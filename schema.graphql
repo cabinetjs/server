@@ -10,6 +10,9 @@ type Board {
   description: String!
   openingPosts: [Post!]!
   posts: [Post!]!
+  postCount: Int!
+  mediaCount: Int!
+  latestAttachment: Attachment
 }
 
 type Attachment {
@@ -47,6 +50,7 @@ type DataSource {
 }
 
 type Query {
+  dataSource(name: String!): DataSource
   dataSources: [DataSource!]!
   post(id: String!): Post
   posts(skip: Int, take: Int): [Post!]!
