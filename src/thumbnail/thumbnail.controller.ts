@@ -1,10 +1,10 @@
+import path from "path";
 import type { Response } from "express";
 
 import { Controller, Get, Inject, Param, Res } from "@nestjs/common";
 
 import { ThumbnailService } from "@thumbnail/thumbnail.service";
 import { AttachmentService } from "@attachment/attachment.service";
-import path from "path";
 
 @Controller("thumbnails")
 export class ThumbnailController {
