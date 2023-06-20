@@ -64,6 +64,10 @@ export class DatabaseService {
             const targetPosts = [...addedPosts, ...updatedPosts];
             for (const post of targetPosts) {
                 post.board = targetBoard;
+                post.attachments = [
+                    ...(post.attachments ?? []),
+                    ...allAttachments.filter(a => a.uri.startsWith(post.uri)),
+                ];
             }
 
             const savedPosts = await this.postService.save(targetPosts);
