@@ -21,7 +21,9 @@ export class BoardResolver extends createBaseResolver(Board) {
 
     @ResolveField(() => [Post])
     public async openingPosts(@Root() board: Board, @Context("loaders") loaders: GraphQLContext["loaders"]) {
-        return loaders.openingPost.loadMany(board.postIds).then(posts => _.compact(posts));
+        return loaders.openingPost
+            .loadMany(board.postIds)
+            .then(posts => _.chain(posts).compact().orderBy("writtenAt", "desc"));
     }
 
     @ResolveField(() => [Post])

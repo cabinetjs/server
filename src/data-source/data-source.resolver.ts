@@ -65,6 +65,7 @@ export class DataSourceResolver {
                 uri: Like(`${dataSource.id}::%`),
                 parent: IsNull(),
             },
+            order: { writtenAt: "DESC" },
         });
     }
 

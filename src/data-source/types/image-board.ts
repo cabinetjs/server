@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import _ from "lodash";
 import { decode } from "html-entities";
 
@@ -140,6 +141,7 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
             title: rawPost.sub ? decode(rawPost.sub) : null,
             content: rawPost.com ? decode(rawPost.com) : null,
             attachments: _.compact([this.getAttachment(boardCode, rawPost, uri)]),
+            writtenAt: dayjs.unix(rawPost.time).toDate(),
         };
     }
 

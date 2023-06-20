@@ -34,11 +34,17 @@ type Post {
   no: Int!
   title: String
   content: String
+  writtenAt: DateTime!
   replies: [Post!]!
   replyCount: Int!
   attachmentCount: Int!
   attachments: [Attachment!]!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type DataSource {
   id: String!

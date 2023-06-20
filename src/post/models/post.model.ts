@@ -34,6 +34,10 @@ export class Post extends BaseEntity {
     @Column({ type: "text", nullable: true })
     public content?: Nullable<string>;
 
+    @Field(() => Date)
+    @Column({ type: "datetime" })
+    public writtenAt!: Date;
+
     // Post[] => Board
     @ManyToOne(() => Board, item => item.posts)
     public board!: Board;
