@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { BaseEntity, DeepPartial, FindOptionsWhere, In, Repository, FindManyOptions, FindOneOptions } from "typeorm";
+import { BaseEntity, DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere, In, Repository } from "typeorm";
 
 import { SelectManyArgs } from "@common/select-many.dto";
 
@@ -48,6 +48,13 @@ export abstract class BaseService<TEntity extends Entity, RawType extends DeepPa
         return this.repository.find({
             skip,
             take,
+        });
+    }
+    public async selectOne(id: string) {
+        return this.repository.findOne({
+            where: {
+                id,
+            } as FindOptionsWhere<TEntity>,
         });
     }
 

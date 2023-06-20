@@ -48,6 +48,8 @@ type DataSource {
 
 type Query {
   dataSources: [DataSource!]!
+  post(id: String!): Post
   posts(skip: Int, take: Int): [Post!]!
+  board(id: String!): Board
   boards(skip: Int, take: Int): [Board!]!
 }
