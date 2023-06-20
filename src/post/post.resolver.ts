@@ -24,6 +24,6 @@ export class PostResolver extends createBaseResolver(Post) {
 
     @ResolveField(() => [Attachment])
     public async attachments(@Root() post: Post, @Context("loaders") loaders: GraphQLContext["loaders"]) {
-        return loaders.attachmentOfPost.load(post.uri);
+        return loaders.attachmentOfPost.load(post.id);
     }
 }
