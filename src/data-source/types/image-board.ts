@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { decode } from "html-entities";
 
 import { BoardAPIResponse, CatalogAPIResponse, ThreadsAPIResponse } from "@data-source/types/image-board.types";
 import { BaseDataSource, BaseDataSourceOption } from "@data-source/types/base";
@@ -100,7 +101,7 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
                     uri: `${this.name}::${boardCode}`,
                     code: targetBoard.board,
                     name: targetBoard.title,
-                    description: targetBoard.meta_description,
+                    description: decode(targetBoard.meta_description),
                     posts: [],
                 };
 
