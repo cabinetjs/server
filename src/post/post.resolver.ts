@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { Context, ResolveField, Resolver, Root } from "@nestjs/graphql";
+import { Context, Int, ResolveField, Resolver, Root } from "@nestjs/graphql";
 
 import { PostService } from "@post/post.service";
 import { Post } from "@post/models/post.model";
@@ -20,6 +20,16 @@ export class PostResolver extends createBaseResolver(Post) {
         const replyIds = await this.postService.getReplyIdsOf(post);
 
         return loaders.post.loadMany(replyIds);
+    }
+
+    @ResolveField(() => Int)
+    public async replyCount(@Root() post: Post, @Context("loaders") loaders: GraphQLContext["loaders"]) {
+        return loaders.postReplyCount.load(post.uri);
+    }
+
+    @ResolveField(() => Int)
+    public async attachmentCount(@Root() post: Post, @Context("loaders") loaders: GraphQLContext["loaders"]) {
+        return loaders.postAttachmentCount.load(post.uri);
     }
 
     @ResolveField(() => [Attachment])

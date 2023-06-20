@@ -13,6 +13,8 @@ export interface GraphQLContext {
         openingPost: DataLoader<Post["id"], Post | null>;
         attachment: DataLoader<Attachment["id"], Attachment>;
         attachmentOfPost: DataLoader<Post["id"], Attachment[]>;
+        postReplyCount: DataLoader<Post["id"], number>;
+        postAttachmentCount: DataLoader<Post["id"], number>;
     };
 }
 
@@ -35,6 +37,10 @@ export function createGraphQLContext(postService: PostService, attachmentService
 
                     return attachments.filter(attachment => attachmentIds.includes(attachment.id));
                 });
+            }),
+            postReplyCount: new DataLoader(async (ids: readonly Post["id"][]) => postService.getReplyCounts(ids)),
+            postAttachmentCount: new DataLoader(async (ids: readonly Post["id"][]) => {
+                return postService.getAttachmentCounts(ids);
             }),
         },
     };

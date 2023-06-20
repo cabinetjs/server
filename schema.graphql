@@ -35,6 +35,8 @@ type Post {
   title: String
   content: String
   replies: [Post!]!
+  replyCount: Int!
+  attachmentCount: Int!
   attachments: [Attachment!]!
 }
 

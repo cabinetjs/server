@@ -1,13 +1,4 @@
-import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    Entity,
-    ManyToOne,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    RelationId,
-} from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 import { Field, Int, ObjectType } from "@nestjs/graphql";
 
@@ -74,9 +65,6 @@ export class Attachment extends BaseEntity {
     // Attachment => Thumbnail[]
     @OneToMany(() => Thumbnail, item => item.attachment)
     public thumbnails!: Thumbnail[];
-
-    @RelationId((item: Attachment) => item.thumbnails)
-    public thumbnailIds!: Thumbnail["id"][];
 }
 
 export type RawAttachment = Omit<AsRawType<Attachment>, "id">;
