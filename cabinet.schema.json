@@ -148,6 +148,9 @@
         },
         "storingConcurrency": {
             "type": "number"
+        },
+        "thumbnailPath": {
+            "type": "string"
         }
     },
     "required": [

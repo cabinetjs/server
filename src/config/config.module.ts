@@ -21,6 +21,7 @@ export interface Config {
     api?: ApiOptions;
     crawlInterval: number | string;
     storingConcurrency?: number;
+    thumbnailPath?: string;
 }
 
 const DEFAULT_CONFIG: Config = {
@@ -30,6 +31,7 @@ const DEFAULT_CONFIG: Config = {
         type: "local",
         path: "./downloads",
     },
+    thumbnailPath: "./thumbnails",
 };
 
 export class ConfigModule {

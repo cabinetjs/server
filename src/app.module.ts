@@ -49,12 +49,17 @@ export class AppModule implements OnModuleInit {
             );
         }
 
+        let thumbnailPath = config.thumbnailPath || "./thumbnails";
+        if (!path.isAbsolute(thumbnailPath)) {
+            thumbnailPath = path.join(process.cwd(), thumbnailPath);
+        }
+
         return {
             module: AppModule,
             imports: [
                 ...imports,
                 ServeStaticModule.forRoot({
-                    rootPath: path.join(process.cwd(), "thumbnails"),
+                    rootPath: thumbnailPath,
                     serveRoot: "/thumbnails",
                 }),
                 ConfigModule.forRoot(config),

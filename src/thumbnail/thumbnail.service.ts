@@ -1,5 +1,7 @@
 import fileType from "file-type";
-
+import sharp from "sharp";
+import path from "path";
+import fs from "fs-extra";
 import { Repository } from "typeorm";
 
 import { Inject, Injectable } from "@nestjs/common";
@@ -8,21 +10,31 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Thumbnail } from "@thumbnail/models/thumbnail.model";
 import { Attachment } from "@attachment/models/attachment.model";
 
+import { Config } from "@config/config.module";
+import { InjectConfig } from "@config/config.decorator";
+
 import { StorageService } from "@storage/storage.service";
 
 import { BaseService } from "@common/base.service";
 import { screenshotVideo } from "@utils/media";
-import sharp from "sharp";
-import path from "path";
-import fs from "fs-extra";
 
 @Injectable()
 export class ThumbnailService extends BaseService<Thumbnail> {
+    private readonly thumbnailPath: string;
+
     public constructor(
+        @InjectConfig() private readonly config: Config,
         @InjectRepository(Thumbnail) private readonly thumbnailRepository: Repository<Thumbnail>,
         @Inject(StorageService) private readonly storageService: StorageService,
     ) {
         super(Thumbnail, thumbnailRepository);
+
+        let thumbnailPath = config.thumbnailPath || "./thumbnails";
+        if (!path.isAbsolute(thumbnailPath)) {
+            thumbnailPath = path.join(process.cwd(), thumbnailPath);
+        }
+
+        this.thumbnailPath = thumbnailPath;
     }
 
     public async fromAttachment(attachment: Attachment, width: number, height: number): Promise<Thumbnail | null> {
@@ -83,7 +95,7 @@ export class ThumbnailService extends BaseService<Thumbnail> {
         thumbnail.attachment = attachment;
         thumbnail = await this.save(thumbnail);
 
-        thumbnail.path = path.join(process.cwd(), "thumbnails", `${thumbnail.id}.jpg`);
+        thumbnail.path = path.join(this.thumbnailPath, `${thumbnail.id}.jpg`);
 
         await fs.ensureDir(path.dirname(thumbnail.path));
         await fs.writeFile(thumbnail.path, thumbnailBuffer);
