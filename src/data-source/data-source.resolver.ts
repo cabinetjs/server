@@ -49,6 +49,11 @@ export class DataSourceResolver {
         return this.dataSourceService.getMediaCount(dataSource.id);
     }
 
+    @ResolveField(() => Int)
+    public async boardCount(@Root() dataSource: DataSourceModel) {
+        return this.boardService.count({ uri: Like(`${dataSource.id}::%`) });
+    }
+
     @ResolveField(() => Attachment, { nullable: true })
     public async latestAttachment(@Root() dataSource: DataSourceModel) {
         return this.dataSourceService.getLatestMedia(dataSource.id);
