@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import _ from "lodash";
 import { decode } from "html-entities";
+import mime from "mime-types";
 
 import { BoardAPIResponse, CatalogAPIResponse, ThreadsAPIResponse } from "@data-source/types/image-board.types";
 import { BaseDataSource, BaseDataSourceOption } from "@data-source/types/base";
@@ -158,6 +159,7 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
             name: post.filename,
             extension: post.ext,
             hash: post.md5,
+            mimeType: mime.lookup(post.ext) || null,
         };
     }
 }

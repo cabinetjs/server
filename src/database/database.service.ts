@@ -126,6 +126,7 @@ export class DatabaseService {
         result.name = newAttachment.name;
         result.extension = newAttachment.extension;
         result.hash = newAttachment.hash;
+        result.mimeType = newAttachment.mimeType;
 
         return result;
     }

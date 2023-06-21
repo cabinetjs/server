@@ -24,6 +24,7 @@ type Attachment {
   size: Int!
   name: String!
   extension: String!
+  mimeType: String
   hash: String!
 }
 
