@@ -34,6 +34,11 @@ export class DataSourceResolver {
         return this.dataSourceService.getRegisteredDataSources();
     }
 
+    @Query(() => Int)
+    public async dataSourceCount(): Promise<number> {
+        return this.dataSourceService.getRegisteredDataSources().length;
+    }
+
     @ResolveField(() => Int)
     public async postCount(@Root() dataSource: DataSourceModel) {
         return this.dataSourceService.getPostCount(dataSource.id);
