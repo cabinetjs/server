@@ -1,8 +1,9 @@
+import _ from "lodash";
 import fileType from "file-type";
 import sharp from "sharp";
 import path from "path";
 import fs from "fs-extra";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -27,6 +28,8 @@ interface SingularThumbnailSize {
     size: number;
 }
 
+export type ThumbnailSize = RectThumbnailSize | SingularThumbnailSize;
+
 @Injectable()
 export class ThumbnailService extends BaseService<Thumbnail> {
     private readonly thumbnailPath: string;
@@ -46,14 +49,61 @@ export class ThumbnailService extends BaseService<Thumbnail> {
         this.thumbnailPath = thumbnailPath;
     }
 
-    public async fromAttachment(
-        attachment: Attachment,
-        size: RectThumbnailSize | SingularThumbnailSize,
-    ): Promise<Thumbnail | null> {
+    public async fromPairs(pairs: ReadonlyArray<[Attachment, ThumbnailSize]>): Promise<Array<Thumbnail | null>> {
         let queryBuilder = this.thumbnailRepository
             .createQueryBuilder("t")
             .select("t.id", "id")
-            .where("t.attachmentId = :attachmentId", { attachmentId: attachment.uri });
+            .select("t.attachmentId", "attachmentId");
+
+        for (const [attachment, size] of pairs) {
+            if ("width" in size) {
+                const { width, height } = size;
+
+                queryBuilder = queryBuilder.orWhere(
+                    "(t.attachmentId = :attachmentId AND t.width = :width AND t.height = :height)",
+                    { attachmentId: attachment.id, width, height },
+                );
+            } else {
+                const { size: thumbnailSize } = size;
+
+                queryBuilder = queryBuilder.orWhere("t.attachmentId = :attachmentId AND size = :size", {
+                    attachmentId: attachment.id,
+                    size: thumbnailSize,
+                });
+            }
+        }
+
+        const items = await queryBuilder.getRawMany<{ id: string; attachmentId: string }>();
+        const allThumbnails = await this.find({
+            where: { id: In(items.map(item => item.id)) },
+        });
+
+        const thumbnailMap = _.chain(allThumbnails).keyBy("attachmentId").value();
+        return pairs.map(([attachment, size]) => {
+            if ("width" in size) {
+                const { width, height } = size;
+                const thumbnail = thumbnailMap[attachment.uri];
+                if (!thumbnail || thumbnail.width !== width || thumbnail.height !== height) {
+                    return null;
+                }
+
+                return thumbnail;
+            } else {
+                const { size: thumbnailSize } = size;
+                const thumbnail = thumbnailMap[attachment.uri];
+                if (!thumbnail || thumbnail.size !== thumbnailSize) {
+                    return null;
+                }
+
+                return thumbnail;
+            }
+        });
+    }
+    public async fromAttachment(attachment: Attachment, size: ThumbnailSize): Promise<Thumbnail | null> {
+        let queryBuilder = this.thumbnailRepository
+            .createQueryBuilder("t")
+            .select("t.id", "id")
+            .where("t.attachmentId = :attachmentId", { attachmentId: attachment.id });
 
         if ("width" in size) {
             const { width, height } = size;
@@ -78,7 +128,7 @@ export class ThumbnailService extends BaseService<Thumbnail> {
         });
     }
 
-    public async ensure(attachment: Attachment, size: RectThumbnailSize | SingularThumbnailSize): Promise<Thumbnail> {
+    public async ensure(attachment: Attachment, size: ThumbnailSize): Promise<Thumbnail> {
         let thumbnail = await this.fromAttachment(attachment, size);
         if (thumbnail) {
             return thumbnail;
@@ -94,7 +144,7 @@ export class ThumbnailService extends BaseService<Thumbnail> {
         if (type.mime.startsWith("video/")) {
             image = await screenshotVideo(buffer, {
                 count: 1,
-                timestamps: ["50%"],
+                timestamps: [0],
             });
         } else if (type.mime.startsWith("image/")) {
             image = buffer;
@@ -136,8 +186,13 @@ export class ThumbnailService extends BaseService<Thumbnail> {
             thumbnail.size = 0;
         } else {
             const { size: thumbnailSize } = size;
-            thumbnail.width = 0;
-            thumbnail.height = 0;
+            const imageSize = await sharp(thumbnailBuffer).metadata();
+            if (!imageSize.width || !imageSize.height) {
+                throw new Error("Failed to get image size");
+            }
+
+            thumbnail.width = imageSize.width;
+            thumbnail.height = imageSize.height;
             thumbnail.size = thumbnailSize;
         }
 
@@ -160,5 +215,23 @@ export class ThumbnailService extends BaseService<Thumbnail> {
         await fs.writeFile(thumbnail.path, thumbnailBuffer);
 
         return this.save(thumbnail);
+    }
+
+    public async bulkEnsure(pairs: ReadonlyArray<[Attachment, ThumbnailSize]>) {
+        const oldThumbnails = await this.fromPairs(pairs);
+        const results: Thumbnail[] = [];
+        for (let i = 0; i < pairs.length; i++) {
+            const oldThumbnail = oldThumbnails[i];
+            if (oldThumbnail) {
+                results.push(oldThumbnail);
+                continue;
+            }
+
+            const [attachment, size] = pairs[i];
+            const thumbnail = await this.ensure(attachment, size);
+            results.push(thumbnail);
+        }
+
+        return results;
     }
 }

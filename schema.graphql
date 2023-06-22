@@ -15,6 +15,15 @@ type Board {
   latestAttachment: Attachment
 }
 
+type Thumbnail {
+  id: String!
+  width: Int!
+  height: Int!
+  size: Int!
+  filesize: Int!
+  url: String!
+}
+
 type Attachment {
   id: String!
   uri: String!
@@ -24,8 +33,11 @@ type Attachment {
   size: Int!
   name: String!
   extension: String!
+  width: Int
+  height: Int
   mimeType: String
   hash: String!
+  sizedThumbnail(size: Int!): Thumbnail!
 }
 
 type Post {

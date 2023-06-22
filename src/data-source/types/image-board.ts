@@ -159,6 +159,8 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
             name: post.filename,
             extension: post.ext,
             hash: post.md5,
+            width: post.w,
+            height: post.h,
             mimeType: mime.lookup(post.ext) || null,
         };
     }

@@ -25,10 +25,12 @@ export async function screenshotVideo(file: string | Buffer, config: Omit<Screen
         postfix: ".jpg",
     });
 
-    await new Promise<void>((resolve, reject) => {
+    const screenshotBuffer = await new Promise<Buffer>((resolve, reject) => {
         ffmpeg(filePath)
             .on("end", () => {
-                resolve();
+                fs.readFile(screenshot.name).then(buffer => {
+                    resolve(buffer);
+                });
             })
             .on("error", err => {
                 reject(err);
@@ -40,9 +42,7 @@ export async function screenshotVideo(file: string | Buffer, config: Omit<Screen
             });
     });
 
-    const screenshotBuffer = await fs.readFile(screenshot.name);
     screenshot.removeCallback();
-
     if (video) {
         video.removeCallback();
     }

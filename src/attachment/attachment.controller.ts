@@ -28,7 +28,7 @@ export class AttachmentController {
 
         res.setHeader("Content-Type", fileType.mime);
         res.setHeader("Content-Length", buffer.length);
-        res.setHeader("Content-Disposition", `attachment; filename="${attachment.name}.${fileType.ext}"`);
+        res.setHeader("Content-Disposition", `attachment; filename="${attachment.uid}.${fileType.ext}"`);
         res.end(buffer);
     }
 }

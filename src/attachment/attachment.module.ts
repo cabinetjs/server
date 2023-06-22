@@ -6,10 +6,16 @@ import { StorageModule } from "@storage/storage.module";
 import { AttachmentService } from "@attachment/attachment.service";
 import { AttachmentController } from "@attachment/attachment.controller";
 import { Attachment } from "@attachment/models/attachment.model";
+import { AttachmentResolver } from "@attachment/attachment.resolver";
+import { ThumbnailModule } from "@thumbnail/thumbnail.module";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Attachment]), forwardRef(() => StorageModule)],
-    providers: [AttachmentService],
+    imports: [
+        TypeOrmModule.forFeature([Attachment]),
+        forwardRef(() => StorageModule),
+        forwardRef(() => ThumbnailModule),
+    ],
+    providers: [AttachmentService, AttachmentResolver],
     exports: [AttachmentService],
     controllers: [AttachmentController],
 })

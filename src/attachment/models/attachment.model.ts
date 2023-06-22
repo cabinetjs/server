@@ -42,6 +42,14 @@ export class Attachment extends BaseEntity {
     @Column({ type: "text" })
     public extension!: string;
 
+    @Field(() => Int, { nullable: true })
+    @Column({ type: "int", nullable: true })
+    public width?: number;
+
+    @Field(() => Int, { nullable: true })
+    @Column({ type: "int", nullable: true })
+    public height?: number;
+
     @Field(() => String, { nullable: true })
     @Column({ type: "varchar", length: 255, nullable: true })
     public mimeType?: Nullable<string>;

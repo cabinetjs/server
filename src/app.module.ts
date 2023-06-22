@@ -23,9 +23,10 @@ import { AttachmentModule } from "@attachment/attachment.module";
 import { AttachmentService } from "@attachment/attachment.service";
 
 import { createGraphQLContext } from "@utils/graphql";
+import { ThumbnailService } from "@thumbnail/thumbnail.service";
 
 const GRAPHQL_SCHEMA_PATH = path.join(process.cwd(), "./schema.graphql");
-const CLIENT_ROOT = path.join(process.cwd(), "../client");
+const CLIENT_ROOT = path.join(process.cwd(), "../web-client");
 
 @Module({})
 export class AppModule implements OnModuleInit {
@@ -37,14 +38,18 @@ export class AppModule implements OnModuleInit {
             imports.push(
                 GraphQLModule.forRootAsync({
                     driver: ApolloDriver,
-                    inject: [PostService, AttachmentService],
-                    useFactory: (postService: PostService, attachmentService: AttachmentService) => ({
+                    inject: [PostService, AttachmentService, ThumbnailService],
+                    useFactory: (
+                        postService: PostService,
+                        attachmentService: AttachmentService,
+                        thumbnailService: ThumbnailService,
+                    ) => ({
                         path: endpoint,
                         playground,
                         autoSchemaFile: process.env.NODE_ENV === "development" ? GRAPHQL_SCHEMA_PATH : true,
-                        context: () => createGraphQLContext(postService, attachmentService),
+                        context: () => createGraphQLContext(postService, attachmentService, thumbnailService),
                     }),
-                    imports: [PostModule, AttachmentModule],
+                    imports: [PostModule, AttachmentModule, ThumbnailModule],
                 }),
             );
         }
