@@ -49,6 +49,7 @@ type Post {
   content: String
   writtenAt: DateTime!
   replies: [Post!]!
+  lastReply: Post
   replyCount: Int!
   attachmentCount: Int!
   attachments: [Attachment!]!

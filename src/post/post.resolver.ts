@@ -22,6 +22,13 @@ export class PostResolver extends createBaseResolver(Post) {
         return loaders.post.loadMany(replyIds);
     }
 
+    @ResolveField(() => Post, { nullable: true })
+    public async lastReply(@Root() post: Post, @Context("loaders") loaders: GraphQLContext["loaders"]) {
+        const replyIds = await this.postService.getReplyIdsOf(post, ["writtenAt", "DESC"]);
+
+        return loaders.post.load(replyIds[0]);
+    }
+
     @ResolveField(() => Int)
     public async replyCount(@Root() post: Post, @Context("loaders") loaders: GraphQLContext["loaders"]) {
         return loaders.postReplyCount.load(post.uri);

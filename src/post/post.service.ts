@@ -22,13 +22,17 @@ export class PostService extends BaseService<Post, RawPost> {
         return posts.map(post => (post.parent ? null : post));
     }
 
-    public async getReplyIdsOf(post: Post) {
-        return this.repository
+    public async getReplyIdsOf(post: Post, order?: [keyof Post, "ASC" | "DESC"]) {
+        let repository = this.repository
             .createQueryBuilder("p")
             .select("`p`.`id`", "id")
-            .where("`p`.`parent` = :id", { id: post.uri })
-            .getRawMany<{ id: Post["uri"] }>()
-            .then(raw => raw.map(({ id }) => id));
+            .where("`p`.`parent` = :id", { id: post.uri });
+
+        if (order) {
+            repository = repository.orderBy(`\`p\`.\`${order[0]}\``, order[1]);
+        }
+
+        return repository.getRawMany<{ id: Post["uri"] }>().then(raw => raw.map(({ id }) => id));
     }
 
     public async getReplyCounts(uris: ReadonlyArray<Post["id"]>): Promise<number[]> {
