@@ -9,6 +9,7 @@ export interface FetchOptions {
     headers?: Record<string, string>;
     params?: Record<string, string | number>;
     retryCount?: number;
+    silent?: boolean;
 }
 
 export class Fetcher<TEndpointMap extends Record<string, any> = never> {
@@ -23,7 +24,7 @@ export class Fetcher<TEndpointMap extends Record<string, any> = never> {
         endpoint: Endpoint,
         options?: FetchOptions,
     ): Promise<Response> {
-        const { method = "GET", headers = {}, params, retryCount = 5 } = options ?? {};
+        const { method = "GET", headers = {}, params, retryCount = 5, silent = false } = options ?? {};
 
         try {
             const url = `${this.baseUrl}${endpoint}`;
@@ -62,8 +63,15 @@ export class Fetcher<TEndpointMap extends Record<string, any> = never> {
             }
 
             if (retryCount > 0) {
-                this.logger.warn(`Failed to fetch data from {cyan}: {red}`, undefined, `'${endpoint}'`, errorMessage);
-                this.logger.warn("Remaining retry count: {cyan}", undefined, retryCount);
+                if (!silent) {
+                    this.logger.warn(
+                        `Failed to fetch data from {cyan}: {red}`,
+                        undefined,
+                        `'${endpoint}'`,
+                        errorMessage,
+                    );
+                    this.logger.warn("Remaining retry count: {cyan}", undefined, retryCount);
+                }
 
                 return this.fetch(endpoint, {
                     ...options,
@@ -74,8 +82,10 @@ export class Fetcher<TEndpointMap extends Record<string, any> = never> {
                 });
             }
 
-            this.logger.error("Failed to fetch data from {cyan}.", undefined, undefined, `'${endpoint}'`);
-            this.logger.error("Error: {red}", stack, undefined, errorMessage);
+            if (!silent) {
+                this.logger.error("Failed to fetch data from {cyan}.", undefined, undefined, `'${endpoint}'`);
+                this.logger.error("Error: {red}", stack, undefined, errorMessage);
+            }
 
             throw error;
         }

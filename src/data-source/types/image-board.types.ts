@@ -138,3 +138,7 @@ export namespace ThreadsAPIResponse {
 
     export type Post = BasePost | (BasePost & Attachment);
 }
+
+export namespace ArchiveAPIResponse {
+    export type Root = number[];
+}

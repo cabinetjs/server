@@ -15,6 +15,9 @@
                             "type": "string"
                         }
                     },
+                    "withArchive": {
+                        "type": "boolean"
+                    },
                     "filters": {
                         "type": "array",
                         "items": {

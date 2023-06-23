@@ -3,7 +3,12 @@ import _ from "lodash";
 import { decode } from "html-entities";
 import mime from "mime-types";
 
-import { BoardAPIResponse, CatalogAPIResponse, ThreadsAPIResponse } from "@data-source/types/image-board.types";
+import {
+    ArchiveAPIResponse,
+    BoardAPIResponse,
+    CatalogAPIResponse,
+    ThreadsAPIResponse,
+} from "@data-source/types/image-board.types";
 import { BaseDataSource, BaseDataSourceOption } from "@data-source/types/base";
 
 import { RawBoard } from "@board/models/board.model";
@@ -21,6 +26,7 @@ export interface ImageBoardFilter {
 export interface ImageBoardDataSourceOptions extends BaseDataSourceOption<"image-board"> {
     url: string;
     boards: string[];
+    withArchive?: boolean;
     filters?: ImageBoardFilter[];
 }
 
@@ -28,11 +34,13 @@ interface FetcherResponseMap {
     "/boards.json": BoardAPIResponse.Root;
     "/{board}/catalog.json": CatalogAPIResponse.Root;
     "/{board}/thread/{thread}.json": ThreadsAPIResponse.Root;
+    "/{board}/archive.json": ArchiveAPIResponse.Root;
 }
 
-type OpThreadPair = [string, CatalogAPIResponse.Thread];
+type OpThreadPair = [string, Omit<ThreadsAPIResponse.BasePost, "capcode">];
 
 export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoardDataSourceOptions> {
+    private static readonly archivedThreadResponse = new Map<number, ThreadsAPIResponse.Post[]>();
     private readonly fetcher = new Fetcher<FetcherResponseMap>(this.options.url);
     private readonly targetBoards: BoardAPIResponse.Board[] = [];
 
@@ -53,7 +61,7 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
         }
     }
     protected async doCrawl(): Promise<RawBoard[]> {
-        const { boards, filters = [] } = this.options;
+        const { boards, filters = [], withArchive } = this.options;
         const allOpeningThreads: OpThreadPair[] = [];
         for (const boardCode of boards) {
             const pages = await this.fetcher.fetchJson("/{board}/catalog.json", {
@@ -62,6 +70,38 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
 
             for (const { threads } of pages) {
                 allOpeningThreads.push(...threads.map<OpThreadPair>(thread => [boardCode, thread]));
+            }
+        }
+
+        if (withArchive) {
+            for (const boardCode of boards) {
+                if (boardCode === "b") {
+                    continue;
+                }
+
+                const archivedThreadIds = await this.fetcher.fetchJson("/{board}/archive.json", {
+                    params: { board: boardCode },
+                });
+
+                for (const thread of archivedThreadIds) {
+                    try {
+                        let posts: ThreadsAPIResponse.Post[] | undefined =
+                            ImageBoardDataSource.archivedThreadResponse.get(thread);
+
+                        if (!posts) {
+                            const results = await this.fetcher.fetchJson("/{board}/thread/{thread}.json", {
+                                params: { board: boardCode, thread },
+                                silent: true,
+                            });
+
+                            posts = results.posts;
+                            ImageBoardDataSource.archivedThreadResponse.set(thread, posts);
+                        }
+
+                        const [rawOpPost] = posts;
+                        allOpeningThreads.push([boardCode, rawOpPost]);
+                    } catch {}
+                }
             }
         }
 
@@ -110,12 +150,18 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
                 results.push(board);
             }
 
-            const {
-                posts: [rawOpPost, ...rawReplies],
-            } = await this.fetcher.fetchJson("/{board}/thread/{thread}.json", {
-                params: { board: boardCode, thread: opPostId },
-            });
+            let posts: ThreadsAPIResponse.Post[] | undefined =
+                ImageBoardDataSource.archivedThreadResponse.get(opPostId);
 
+            if (!posts) {
+                const results = await this.fetcher.fetchJson("/{board}/thread/{thread}.json", {
+                    params: { board: boardCode, thread: opPostId },
+                });
+
+                posts = results.posts;
+            }
+
+            const [rawOpPost, ...rawReplies] = posts;
             const parentBoard = board;
             const opPost = this.buildPost(boardCode, parentBoard, rawOpPost);
             const replies = rawReplies.map(rawReply => this.buildPost(boardCode, parentBoard, rawReply, opPost));
