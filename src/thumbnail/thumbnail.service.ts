@@ -5,7 +5,7 @@ import path from "path";
 import fs from "fs-extra";
 import { In, Repository } from "typeorm";
 
-import { Inject, Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 
 import { Thumbnail } from "@thumbnail/models/thumbnail.model";
@@ -37,7 +37,7 @@ export class ThumbnailService extends BaseService<Thumbnail> {
     public constructor(
         @InjectConfig() private readonly config: Config,
         @InjectRepository(Thumbnail) private readonly thumbnailRepository: Repository<Thumbnail>,
-        @Inject(StorageService) private readonly storageService: StorageService,
+        @Inject(forwardRef(() => StorageService)) private readonly storageService: StorageService,
     ) {
         super(Thumbnail, thumbnailRepository);
 

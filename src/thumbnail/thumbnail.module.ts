@@ -11,7 +11,11 @@ import { ThumbnailController } from "@thumbnail/thumbnail.controller";
 import { ThumbnailResolver } from "@thumbnail/thumbnail.resolver";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Thumbnail]), StorageModule, forwardRef(() => AttachmentModule)],
+    imports: [
+        TypeOrmModule.forFeature([Thumbnail]),
+        forwardRef(() => StorageModule),
+        forwardRef(() => AttachmentModule),
+    ],
     providers: [ThumbnailService, ThumbnailResolver],
     controllers: [ThumbnailController],
     exports: [ThumbnailService],

@@ -14,6 +14,7 @@ import { createStorage } from "@storage/types";
 import { BaseStorage } from "@storage/types/base";
 
 import { Logger } from "@utils/logger";
+import { ThumbnailService } from "@thumbnail/thumbnail.service";
 
 @Injectable()
 export class StorageService implements OnApplicationBootstrap {
@@ -34,6 +35,7 @@ export class StorageService implements OnApplicationBootstrap {
     public constructor(
         @InjectConfig() config: Config,
         @Inject(forwardRef(() => AttachmentService)) private readonly attachmentService: AttachmentService,
+        @Inject(forwardRef(() => ThumbnailService)) private readonly thumbnailService: ThumbnailService,
     ) {
         this.config = config;
         this.queue = async.queue(this.drainQueue.bind(this), config.storingConcurrency ?? 1);
@@ -82,6 +84,7 @@ export class StorageService implements OnApplicationBootstrap {
         (async () => {
             try {
                 const data = await this.storage.store(attachment);
+                data.thumbnails = [await this.thumbnailService.ensure(data, { size: 150 })];
                 await this.attachmentService.save(data);
 
                 this.logger.log(

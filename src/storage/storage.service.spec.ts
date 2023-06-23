@@ -1,11 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 
 import { StorageService } from "@storage/storage.service";
+import { AttachmentService } from "@attachment/attachment.service";
+import { ThumbnailService } from "@thumbnail/thumbnail.service";
 
 import { CONFIG_DATA } from "@config/config.module";
 
 import { configMockFactory } from "../../test/config.mock";
-import { AttachmentService } from "@attachment/attachment.service";
 
 describe("StorageService", () => {
     let service: StorageService;
@@ -16,6 +17,7 @@ describe("StorageService", () => {
                 StorageService,
                 { provide: CONFIG_DATA, useFactory: configMockFactory },
                 { provide: AttachmentService, useValue: {} },
+                { provide: ThumbnailService, useValue: {} },
             ],
         }).compile();
 
