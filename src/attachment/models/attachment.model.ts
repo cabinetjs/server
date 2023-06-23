@@ -10,6 +10,17 @@ import { AsRawType, Nullable } from "@utils/types";
 @ObjectType()
 @Entity({ name: "attachments" })
 export class Attachment extends BaseEntity {
+    public static compare(left: Attachment | RawAttachment, right: Attachment | RawAttachment): boolean {
+        return !(
+            left.uri !== right.uri ||
+            left.uid !== right.uid ||
+            left.url !== right.url ||
+            left.size !== right.size ||
+            left.name !== right.name ||
+            left.hash !== right.hash
+        );
+    }
+
     @Field(() => String)
     @PrimaryGeneratedColumn("uuid")
     public id!: string;

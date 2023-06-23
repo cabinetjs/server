@@ -56,10 +56,7 @@ export class DatabaseService {
 
             allBoards.push(targetBoard);
 
-            const oldPosts = await this.postService.find({
-                where: { uri: Like(`${board.uri}::%`) },
-            });
-
+            const oldPosts = await this.postService.find({ where: { uri: Like(`${board.uri}::%`) } });
             const { updatedPosts, addedPosts } = this.mergePosts(oldPosts, board.posts, attachmentMap);
             const targetPosts = [...addedPosts, ...updatedPosts];
             for (const post of targetPosts) {
@@ -100,7 +97,7 @@ export class DatabaseService {
                 continue;
             }
 
-            if (!newAttachment) {
+            if (!newAttachment || Attachment.compare(oldAttachment, newAttachment)) {
                 continue;
             }
 
@@ -156,7 +153,7 @@ export class DatabaseService {
                 continue;
             }
 
-            if (!newPost) {
+            if (!newPost || Post.compare(oldPost, newPost)) {
                 continue;
             }
 

@@ -10,6 +10,17 @@ import { AsRawType, Nullable } from "@utils/types";
 @ObjectType()
 @Entity({ name: "posts" })
 export class Post extends BaseEntity {
+    public static compare(left: Post | RawPost, right: Post | RawPost): boolean {
+        return !(
+            left.uri !== right.uri ||
+            left.parent !== right.parent ||
+            left.no !== right.no ||
+            left.title !== right.title ||
+            left.content !== right.content ||
+            left.writtenAt.getTime() !== right.writtenAt.getTime()
+        );
+    }
+
     @Field(() => String)
     @PrimaryGeneratedColumn("uuid")
     public id!: string;

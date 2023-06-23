@@ -183,7 +183,7 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
 
         return {
             uri,
-            parent: parent?.uri,
+            parent: parent?.uri ?? null,
             no: rawPost.no,
             title: rawPost.sub ? decode(rawPost.sub) : null,
             content: rawPost.com ? decode(rawPost.com) : null,
