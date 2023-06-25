@@ -25,6 +25,9 @@ export class PostResolver extends createBaseResolver(Post) {
     @ResolveField(() => Post, { nullable: true })
     public async lastReply(@Root() post: Post, @Context("loaders") loaders: GraphQLContext["loaders"]) {
         const replyIds = await this.postService.getReplyIdsOf(post, ["writtenAt", "DESC"]);
+        if (replyIds.length === 0) {
+            return null;
+        }
 
         return loaders.post.load(replyIds[0]);
     }
