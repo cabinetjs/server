@@ -189,6 +189,7 @@ export class ImageBoardDataSource extends BaseDataSource<"image-board", ImageBoa
             content: rawPost.com ? decode(rawPost.com) : null,
             attachments: _.compact([this.getAttachment(boardCode, rawPost, uri)]),
             writtenAt: dayjs.unix(rawPost.time).toDate(),
+            author: rawPost.name,
         };
     }
 

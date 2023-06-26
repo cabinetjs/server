@@ -45,6 +45,10 @@ export class Post extends BaseEntity {
     @Column({ type: "text", nullable: true })
     public content?: Nullable<string>;
 
+    @Field(() => String, { nullable: true })
+    @Column({ type: "varchar", length: 255, nullable: true })
+    public author?: Nullable<string>;
+
     @Field(() => Date)
     @Column({ type: "datetime" })
     public writtenAt!: Date;

@@ -47,6 +47,7 @@ type Post {
   no: Int!
   title: String
   content: String
+  author: String
   writtenAt: DateTime!
   replies: [Post!]!
   lastReply: Post
