@@ -1,8 +1,9 @@
 import path from "path";
 import fs from "fs-extra";
 import { is } from "typia";
+import sanitize from "sanitize-filename";
 
-import { BaseStorage, BaseStorageOptions } from "@storage/types/base";
+import { BaseData, BaseStorage, BaseStorageOptions } from "@storage/types/base";
 import { Attachment } from "@attachment/models/attachment.model";
 
 import { Fetcher } from "@utils/fetcher";
@@ -11,9 +12,12 @@ export interface LocalStorageOptions extends BaseStorageOptions<"local"> {
     path: string;
 }
 
-export interface LocalStorageData {
+export interface LocalStorageData extends BaseData {
     path: string;
 }
+
+const getFileName = (attachment: Attachment) =>
+    `${sanitize(attachment.uid, { replacement: "_" })}${attachment.extension}`;
 
 export class LocalStorage extends BaseStorage<"local", LocalStorageOptions, LocalStorageData> {
     private readonly fetcher: Fetcher = new Fetcher();
@@ -40,18 +44,19 @@ export class LocalStorage extends BaseStorage<"local", LocalStorageOptions, Loca
     }
     public async doStore(attachment: Attachment): Promise<LocalStorageData> {
         const buffer = await this.fetcher.download(attachment.url);
-        const fileName = `${attachment.uid}${attachment.extension}`;
+        const fileName = getFileName(attachment);
         const targetPath = path.join(this.path, fileName);
 
         await fs.writeFile(targetPath, buffer);
 
         return {
             path: targetPath,
+            buffer,
         };
     }
     public async doCheckStored(attachment: Attachment): Promise<boolean> {
         if (!attachment.storageData) {
-            return true;
+            return false;
         }
 
         const data = JSON.parse(attachment.storageData);
@@ -59,7 +64,7 @@ export class LocalStorage extends BaseStorage<"local", LocalStorageOptions, Loca
             return false;
         }
 
-        const fileName = `${attachment.uid}${attachment.extension}`;
+        const fileName = getFileName(attachment);
         const targetPath = path.join(this.path, fileName);
         if (data.path !== targetPath) {
             return false;

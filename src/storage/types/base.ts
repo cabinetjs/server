@@ -3,15 +3,20 @@ import { pascalCase } from "change-case";
 import { Attachment } from "@attachment/models/attachment.model";
 
 import { Logger } from "@utils/logger";
+import { fromBuffer } from "file-type";
 
 export interface BaseStorageOptions<Type extends string> {
     type: Type;
 }
 
+export interface BaseData {
+    buffer?: Buffer;
+}
+
 export abstract class BaseStorage<
     Type extends string,
     TOptions extends BaseStorageOptions<Type> = BaseStorageOptions<Type>,
-    TData = any,
+    TData extends BaseData = any,
 > {
     protected readonly type: Type;
     protected readonly storageName: string;
@@ -43,6 +48,17 @@ export abstract class BaseStorage<
         attachment.isStored = true;
         attachment.storageData = JSON.stringify(data);
         attachment.storedAt = new Date();
+
+        if (data.buffer) {
+            const { buffer } = data;
+            attachment.size ||= buffer.length;
+
+            const fileType = await fromBuffer(buffer);
+            if (fileType) {
+                attachment.extension ||= fileType.ext;
+                attachment.mimeType ||= fileType.mime;
+            }
+        }
 
         return attachment;
     }

@@ -11,7 +11,7 @@ import {
 
 import { Attachment } from "@attachment/models/attachment.model";
 
-import { BaseStorage, BaseStorageOptions } from "@storage/types/base";
+import { BaseData, BaseStorage, BaseStorageOptions } from "@storage/types/base";
 
 import { Fetcher } from "@utils/fetcher";
 
@@ -25,7 +25,7 @@ export interface S3StorageOptions extends BaseStorageOptions<"s3"> {
     };
 }
 
-export interface S3StorageData {
+export interface S3StorageData extends BaseData {
     bucketName: string;
     key: string;
 }
@@ -69,6 +69,7 @@ export class S3Storage extends BaseStorage<"s3", S3StorageOptions, S3StorageData
         return {
             bucketName: this.options.bucketName,
             key: `${attachment.uid}${attachment.extension}`,
+            buffer,
         };
     }
     public async doCheckStored(attachment: Attachment): Promise<boolean> {
