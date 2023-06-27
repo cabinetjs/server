@@ -33,7 +33,7 @@ ARG APP_ENV=production
 
 ENV NODE_ENV ${NODE_ENV}
 
-CMD [ "node", "dist/index" ]
+CMD [ "node", "dist/main" ]
 
 FROM node:18-alpine as production
 
@@ -52,4 +52,4 @@ ARG APP_ENV=production
 
 ENV NODE_ENV ${NODE_ENV}
 
-CMD [ "node", "dist/index" ]
+CMD [ "node", "dist/main" ]
