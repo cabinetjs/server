@@ -4,52 +4,95 @@
         "dataSources": {
             "type": "array",
             "items": {
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string"
-                    },
-                    "boards": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "withArchive": {
-                        "type": "boolean"
-                    },
-                    "filters": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "title": {
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "url": {
+                                "type": "string"
+                            },
+                            "boards": {
+                                "type": "array",
+                                "items": {
                                     "type": "string"
-                                },
-                                "content": {
-                                    "type": "string"
-                                },
-                                "caseSensitive": {
-                                    "type": "boolean"
                                 }
+                            },
+                            "withArchive": {
+                                "type": "boolean"
+                            },
+                            "filters": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "content": {
+                                            "type": "string"
+                                        },
+                                        "caseSensitive": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            },
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "image-board"
+                                ]
+                            },
+                            "name": {
+                                "type": "string"
                             }
-                        }
-                    },
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "image-board"
+                        },
+                        "required": [
+                            "url",
+                            "boards",
+                            "type",
+                            "name"
                         ]
                     },
-                    "name": {
-                        "type": "string"
+                    {
+                        "type": "object",
+                        "properties": {
+                            "blogs": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "url": {
+                                            "type": "string"
+                                        },
+                                        "boardUrl": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "url"
+                                    ]
+                                }
+                            },
+                            "withComments": {
+                                "type": "boolean"
+                            },
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "naver-blog"
+                                ]
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "blogs",
+                            "type",
+                            "name"
+                        ]
                     }
-                },
-                "required": [
-                    "url",
-                    "boards",
-                    "type",
-                    "name"
                 ]
             }
         },

@@ -25,9 +25,9 @@ export class Board extends BaseEntity {
     @Column({ type: "varchar", length: 255 })
     public name!: string;
 
-    @Field(() => String)
-    @Column({ type: "text" })
-    public description!: string;
+    @Field(() => String, { nullable: true })
+    @Column({ type: "text", nullable: true })
+    public description?: string;
 
     // Board => Post[]
     @OneToMany(() => Post, item => item.board)

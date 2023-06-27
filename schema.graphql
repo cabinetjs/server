@@ -7,7 +7,7 @@ type Board {
   uri: String!
   code: String!
   name: String!
-  description: String!
+  description: String
   openingPosts: [Post!]!
   posts: [Post!]!
   postCount: Int!
