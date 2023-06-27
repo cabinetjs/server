@@ -44,13 +44,12 @@ export abstract class BaseStorage<
     }
 
     public async store(attachment: Attachment): Promise<Attachment> {
-        const data = await this.doStore(attachment);
+        const { buffer, ...data } = await this.doStore(attachment);
         attachment.isStored = true;
         attachment.storageData = JSON.stringify(data);
         attachment.storedAt = new Date();
 
-        if (data.buffer) {
-            const { buffer } = data;
+        if (buffer) {
             attachment.size ||= buffer.length;
 
             const fileType = await fromBuffer(buffer);
