@@ -77,10 +77,6 @@ export class StorageService implements OnApplicationBootstrap {
     }
 
     private drainQueue(attachment: Attachment, callback: ErrorCallback) {
-        if (attachment.isStored) {
-            return;
-        }
-
         (async () => {
             try {
                 const data = await this.storage.store(attachment);
