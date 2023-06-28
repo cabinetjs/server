@@ -30,7 +30,7 @@ const CLIENT_ROOT = path.join(process.cwd(), "../web-client");
 
 @Module({})
 export class AppModule implements OnModuleInit {
-    public static forRoot(config: Config, dropDatabase: boolean): DynamicModule {
+    public static forRoot(config: Config, dropDatabase: boolean, databasePath: string): DynamicModule {
         const imports: DynamicModule[] = [];
         if (config.api?.type === "graphql") {
             const { endpoint = "/graphql", playground = true } = config.api;
@@ -70,7 +70,7 @@ export class AppModule implements OnModuleInit {
                 ConfigModule.forRoot(config),
                 TypeOrmModule.forRoot({
                     type: "sqlite",
-                    database: "database.sqlite",
+                    database: databasePath,
                     entities: [`${__dirname}/**/*.model{.ts,.js}`],
                     migrations: [`${__dirname}/migrations/**/*{.ts,.js}`],
                     dropSchema: dropDatabase,

@@ -1,4 +1,6 @@
 import { program } from "commander";
+import path from "path";
+import fs from "fs-extra";
 
 import { NestFactory } from "@nestjs/core";
 
@@ -12,11 +14,13 @@ import { ConfigModule } from "@config/config.module";
 interface CLIOptions {
     config: string;
     dropDatabase: boolean;
+    databasePath: string;
 }
 
 async function bootstrap() {
     program
         .option("-c, --config <path>", "Path to config file", "./cabinet.config.json")
+        .option("-p, --database-path <path>", "Path to database file", "./database.sqlite")
         .option("-d, --drop-database", "Drop database before start", false)
         .parse(process.argv);
 
@@ -24,12 +28,19 @@ async function bootstrap() {
     const pkg = require("../package.json");
     const options = program.opts<CLIOptions>();
     const configPath = options.config ?? "./cabinet.config.json";
+    let databasePath = options.databasePath ?? "./database.sqlite";
+    if (!path.isAbsolute(databasePath)) {
+        databasePath = path.join(process.cwd(), databasePath);
+
+        const directoryPath = path.dirname(databasePath);
+        await fs.ensureDir(directoryPath);
+    }
 
     printTitle(pkg.version);
     drawLine(TITLE_WIDTH * 1.5, "=");
 
     const config = await ConfigModule.loadConfig(configPath);
-    const app = await NestFactory.create(AppModule.forRoot(config, options.dropDatabase), {
+    const app = await NestFactory.create(AppModule.forRoot(config, options.dropDatabase, databasePath), {
         logger: new Logger(),
         cors: {
             origin: "*",
