@@ -27,8 +27,8 @@ async function bootstrap() {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pkg = require("../package.json");
     const options = program.opts<CLIOptions>();
-    const configPath = options.config ?? "./cabinet.config.json";
-    let databasePath = options.databasePath ?? "./database.sqlite";
+    const configPath = process.env.CABINETJS_CONFIG_PATH ?? options.config ?? "./cabinet.config.json";
+    let databasePath = process.env.CABINETJS_DATABASE_PATH ?? options.databasePath ?? "./database.sqlite";
     if (!path.isAbsolute(databasePath)) {
         databasePath = path.join(process.cwd(), databasePath);
 
