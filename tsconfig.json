@@ -33,7 +33,8 @@
             "@attachment/*": ["src/attachment/*"],
             "@database/*": ["src/database/*"],
             "@storage/*": ["src/storage/*"],
-            "@thumbnail/*": ["src/thumbnail/*"]
+            "@thumbnail/*": ["src/thumbnail/*"],
+            "@statistic/*": ["src/statistic/*"]
         },
         "plugins": [
             {

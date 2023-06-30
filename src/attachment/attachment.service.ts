@@ -11,6 +11,7 @@ import { Post } from "@post/models/post.model";
 
 import { StorageService } from "@storage/storage.service";
 import { BaseService } from "@common/base.service";
+import { Nullable } from "@utils/types";
 
 @Injectable()
 export class AttachmentService extends BaseService<Attachment, RawAttachment> {
@@ -39,6 +40,25 @@ export class AttachmentService extends BaseService<Attachment, RawAttachment> {
         }
 
         return idMap;
+    }
+
+    public async getFileSize(startDate: Nullable<Date>, endDate: Nullable<Date>) {
+        const result = await this.repository.createQueryBuilder("a").select("SUM(`a`.`size`)", "size");
+
+        if (startDate && !endDate) {
+            result.andWhere("`a`.`createdAt` >= :startDate", { startDate });
+        } else if (!startDate && endDate) {
+            result.andWhere("`a`.`createdAt` <= :endDate", { endDate });
+        } else if (startDate && endDate) {
+            result.andWhere("`a`.`createdAt` BETWEEN :startDate AND :endDate", { startDate, endDate });
+        }
+
+        const data = await result.getRawOne<{ size: string }>();
+        if (!data) {
+            throw new Error("Unexpected error occurred");
+        }
+
+        return parseInt(`${data.size}`, 10);
     }
 
     @OnEvent("attachment.created")

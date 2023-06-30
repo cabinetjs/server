@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs-extra";
+import { BigIntResolver } from "graphql-scalars";
 
 import { DynamicModule, Module, OnModuleInit } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -15,6 +16,7 @@ import { BoardModule } from "@board/board.module";
 import { DatabaseModule } from "@database/database.module";
 import { StorageModule } from "@storage/storage.module";
 import { ThumbnailModule } from "@thumbnail/thumbnail.module";
+import { StatisticModule } from "@statistic/statistic.module";
 
 import { PostModule } from "@post/post.module";
 import { PostService } from "@post/post.service";
@@ -48,6 +50,14 @@ export class AppModule implements OnModuleInit {
                         playground,
                         autoSchemaFile: process.env.NODE_ENV === "development" ? GRAPHQL_SCHEMA_PATH : true,
                         context: () => createGraphQLContext(postService, attachmentService, thumbnailService),
+                        definitions: {
+                            customScalarTypeMapping: {
+                                BigInt: "bigint",
+                            },
+                        },
+                        resolvers: {
+                            BigInt: BigIntResolver,
+                        },
                     }),
                     imports: [PostModule, AttachmentModule, ThumbnailModule],
                 }),
@@ -94,6 +104,7 @@ export class AppModule implements OnModuleInit {
                 StorageModule,
                 CrawlerModule,
                 ThumbnailModule,
+                StatisticModule,
             ],
         };
     }

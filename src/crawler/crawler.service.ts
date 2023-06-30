@@ -1,8 +1,11 @@
 import ms from "ms";
 import { CronJob, Job, SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
+import pluralize from "pluralize";
+import { Repository } from "typeorm";
 
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
+import { InjectRepository } from "@nestjs/typeorm";
 
 import { DatabaseService } from "@database/database.service";
 import { DataSourceService } from "@data-source/data-source.service";
@@ -13,10 +16,10 @@ import { Config } from "@config/config.module";
 import { InjectConfig } from "@config/config.decorator";
 
 import { RawBoard } from "@board/models/board.model";
+import { CrawlerLog } from "@crawler/models/crawler-log.model";
 
 import { formatInterval, isCronExpression } from "@utils/date";
 import { Logger } from "@utils/logger";
-import pluralize from "pluralize";
 
 @Injectable()
 export class CrawlerService implements OnModuleInit {
@@ -26,6 +29,7 @@ export class CrawlerService implements OnModuleInit {
     private job: Job | null = null;
 
     public constructor(
+        @InjectRepository(CrawlerLog) private readonly crawlerLogRepository: Repository<CrawlerLog>,
         @InjectConfig() private readonly config: Config,
         @Inject(DatabaseService) private readonly databaseService: DatabaseService,
         @Inject(DataSourceService) private readonly dataSourceService: DataSourceService,
@@ -57,10 +61,12 @@ export class CrawlerService implements OnModuleInit {
 
         this.logger.log(`Crawler scheduled to run {cyan}`, undefined, formatInterval(crawlInterval));
     }
-
     private async onWork() {
+        const log = this.crawlerLogRepository.create();
+
         try {
             this.logger.log(`Crawling task started`);
+            log.startedAt = new Date();
 
             const rawBoards: RawBoard[] = [];
             for await (const [, data] of this.dataSourceService.crawl()) {
@@ -82,6 +88,11 @@ export class CrawlerService implements OnModuleInit {
 
             this.eventEmitter.emit("attachment.created", new AttachmentCreatedEvent(attachments));
 
+            log.boardCount = boards.length;
+            log.postCount = posts.length;
+            log.attachmentCount = attachments.length;
+            log.finishedAt = new Date();
+            log.success = true;
             this.logger.log(`Crawling task finished successfully`);
         } catch (error) {
             let message: string;
@@ -93,11 +104,22 @@ export class CrawlerService implements OnModuleInit {
                 message = `${error}`;
             }
 
+            log.finishedAt = new Date();
+            log.success = false;
             this.logger.error(`Crawling task failed with Error: {red}`, stack, undefined, message);
         }
+
+        await this.crawlerLogRepository.save(log);
     }
 
     public async start() {
         this.onWork();
+    }
+
+    public async getLastLog(succeeded?: boolean) {
+        return this.crawlerLogRepository.findOne({
+            where: succeeded === undefined ? undefined : { success: succeeded },
+            order: { startedAt: "DESC" },
+        });
     }
 }
