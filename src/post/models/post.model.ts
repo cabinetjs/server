@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 import { Field, Int, ObjectType } from "@nestjs/graphql";
 
@@ -52,6 +52,10 @@ export class Post extends BaseEntity {
     @Field(() => Date)
     @Column({ type: "datetime" })
     public writtenAt!: Date;
+
+    @Field(() => Date)
+    @CreateDateColumn()
+    public createdAt!: Date;
 
     // Post[] => Board
     @ManyToOne(() => Board, item => item.posts)
