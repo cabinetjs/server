@@ -54,7 +54,7 @@ export class AttachmentService extends BaseService<Attachment, RawAttachment> {
         }
 
         const data = await result.getRawOne<{ size: string }>();
-        if (!data) {
+        if (!data?.size) {
             throw new Error("Unexpected error occurred");
         }
 

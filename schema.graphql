@@ -102,6 +102,13 @@ The `BigInt` scalar type represents non-fractional signed whole numeric values.
 """
 scalar BigInt
 
+type AttachmentStatus {
+  count: Int!
+  countDelta: Int!
+  fileSize: BigInt!
+  fileSizeDelta: Int!
+}
+
 type Query {
   dataSource(name: String!): DataSource
   dataSources: [DataSource!]!
@@ -111,10 +118,20 @@ type Query {
   board(id: String!): Board
   boards(skip: Int, take: Int): [Board!]!
   statistic(date: DateTime, timeSpanValue: Int!, timeSpanUnit: TimeSpanUnit!): Statistic!
+  attachmentStatus(range: TimeRange!, date: DateTime): [AttachmentStatus!]!
 }
 
 enum TimeSpanUnit {
   Minute
+  Hour
+  Day
+  Week
+  Month
+  Year
+}
+
+enum TimeRange {
+  HalfHour
   Hour
   Day
   Week
